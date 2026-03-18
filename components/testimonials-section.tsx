@@ -1,6 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Star, Quote } from "lucide-react"
+import { motion, animate } from "framer-motion"
+import { useScrollReveal } from "../hooks/use-scroll-reveal"
 
 const testimonials = [
   {
@@ -53,9 +56,36 @@ const testimonials = [
   },
 ]
 
+function AnimatedStat({ value, suffix, decimals = 0, isVisible }: { value: number; suffix: string; decimals?: number; isVisible: boolean }) {
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    if (isVisible) {
+      const controls = animate(0, value, {
+        duration: 1.5,
+        ease: "easeOut",
+        onUpdate: (latest) => setDisplayValue(latest),
+      })
+      return () => controls.stop()
+    }
+  }, [isVisible, value])
+
+  return <span>{displayValue.toFixed(decimals)}{suffix}</span>
+}
+
+const statsData: { value: number; suffix: string; label: string; decimals?: number }[] = [
+  { value: 50, suffix: "K+", label: "Active Users" },
+  { value: 10, suffix: "M+", label: "Expenses Tracked" },
+  { value: 99.9, suffix: "%", label: "Uptime", decimals: 1 },
+  { value: 4.9, suffix: "/5", label: "User Rating", decimals: 1 },
+]
+
 export function TestimonialsSection() {
+  const { ref, isVisible } = useScrollReveal()
+  const { ref: statsRef, isVisible: statsVisible } = useScrollReveal()
+
   return (
-    <section className="relative bg-[#0c0a14] py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-[120px] overflow-hidden">
+    <section ref={ref} className="relative bg-[#0c0a14] py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-[120px] overflow-hidden">
       {/* Enhanced background effects */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Central glow */}
@@ -72,7 +102,12 @@ export function TestimonialsSection() {
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-6xl mb-4 sm:mb-6">
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5 }}
+            className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-6xl mb-4 sm:mb-6"
+          >
             Loved by{" "}
             <em className="italic relative inline-block">
               <span className="bg-gradient-to-r from-[#9055ff] via-[#c084fc] to-[#e879f9] bg-clip-text text-transparent">
@@ -83,7 +118,7 @@ export function TestimonialsSection() {
                 <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
               </svg>
             </em>
-          </h2>
+          </motion.h2>
           <p className="font-[family-name:var(--font-inter)] text-white/60 text-base sm:text-lg max-w-xl mx-auto px-4">
             Join over 50,000 professionals who have simplified their expense management with our platform.
           </p>
@@ -92,10 +127,12 @@ export function TestimonialsSection() {
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {testimonials.map((testimonial, index) => (
-            <div
+            <motion.div
               key={testimonial.author}
+              initial={{ opacity: 0, y: 24 }}
+              animate={isVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: index * 0.08 }}
               className="group relative p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-[#7b39fc]/40 transition-all duration-300 hover:-translate-y-1"
-              style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Hover glow */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#7b39fc]/10 to-[#9055ff]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -134,32 +171,35 @@ export function TestimonialsSection() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Stats */}
-        <div className="mt-12 sm:mt-16 lg:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {[
-            { value: "50K+", label: "Active Users" },
-            { value: "10M+", label: "Expenses Tracked" },
-            { value: "99.9%", label: "Uptime" },
-            { value: "4.9/5", label: "User Rating" },
-          ].map((stat, index) => (
-            <div 
-              key={stat.label} 
+        <div ref={statsRef} className="mt-12 sm:mt-16 lg:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          {statsData.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0 }}
+              animate={statsVisible ? { opacity: 1 } : {}}
+              transition={{ duration: 0.5 }}
               className="relative text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/5 overflow-hidden group hover:border-[#7b39fc]/30 transition-all duration-300"
             >
               {/* Hover glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#7b39fc]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
               <p className="relative font-[family-name:var(--font-inter)] text-white text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                {stat.value}
+                <AnimatedStat
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  decimals={stat.decimals ?? 0}
+                  isVisible={statsVisible}
+                />
               </p>
               <p className="relative font-[family-name:var(--font-cabin)] text-white/40 text-xs sm:text-sm">
                 {stat.label}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

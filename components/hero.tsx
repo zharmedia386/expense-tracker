@@ -1,5 +1,8 @@
+"use client"
+
 import { ModernButton } from "./modern-button"
 import { FileSpreadsheet, FileText, Image, MessageSquare, Mic } from "lucide-react"
+import { motion } from "framer-motion"
 
 const supportedFormats = [
   { icon: FileSpreadsheet, label: "Excel" },
@@ -33,70 +36,101 @@ export function Hero() {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#7b39fc]/15 rounded-full blur-[150px]" />
 
       {/* Hero Content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-4 sm:px-6 py-24 lg:py-32 max-w-5xl mx-auto">
+      <div className="relative z-10 flex flex-col items-center text-center px-4 sm:px-6 py-24 lg:py-32 max-w-5xl mx-auto space-y-6">
         {/* Tagline Pill */}
-        <div className="flex items-center gap-2 h-[38px] px-3 rounded-full bg-[rgba(85,80,110,0.4)] backdrop-blur-md border border-[rgba(164,132,215,0.5)] shadow-[0_0_30px_rgba(123,57,252,0.3)]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0 }}
+          className="flex items-center gap-2 h-[38px] px-3 rounded-full bg-[rgba(85,80,110,0.4)] backdrop-blur-md border border-[rgba(164,132,215,0.5)] shadow-[0_0_30px_rgba(123,57,252,0.3)]"
+        >
           <span className="px-2 py-1 bg-gradient-to-r from-[#9055ff] to-[#7b39fc] rounded-full font-[family-name:var(--font-cabin)] font-medium text-xs sm:text-sm text-white shadow-lg">
             New
           </span>
           <span className="font-[family-name:var(--font-cabin)] font-medium text-xs sm:text-sm text-white">
             Powered by OpenClaw AI
           </span>
-        </div>
+        </motion.div>
 
         {/* Headline */}
-        <h1 className="mt-6 sm:mt-8 font-[family-name:var(--font-instrument-serif)] text-white text-4xl sm:text-5xl lg:text-[80px] xl:text-[96px] leading-[1.1] text-balance">
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="font-[family-name:var(--font-instrument-serif)] text-white text-4xl sm:text-5xl lg:text-[80px] xl:text-[96px] leading-[1.1] text-balance"
+        >
           Track every expense{" "}
           <em className="italic bg-gradient-to-r from-[#9055ff] to-[#c084fc] bg-clip-text text-transparent">with AI</em>
-        </h1>
+        </motion.h1>
 
         {/* Subtext */}
-        <p className="mt-4 sm:mt-6 font-[family-name:var(--font-inter)] font-normal text-base sm:text-lg text-white/70 max-w-[662px] text-pretty px-4">
-          Send any format - Excel, documents, images, voice, or text. OpenClaw AI automatically 
+        <motion.p
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="font-[family-name:var(--font-inter)] font-normal text-base sm:text-lg text-white/70 max-w-[662px] text-pretty px-4"
+        >
+          Send any format - Excel, documents, images, voice, or text. OpenClaw AI automatically
           categorizes expenses and generates insights in seconds.
-        </p>
+        </motion.p>
 
         {/* Supported Formats */}
         <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3">
-          {supportedFormats.map((format) => (
-            <div
+          {supportedFormats.map((format, index) => (
+            <motion.div
               key={format.label}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.36 + index * 0.06 }}
               className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
             >
               <format.icon className="w-4 h-4 text-[#9055ff]" />
               <span className="font-[family-name:var(--font-cabin)] text-white/70 text-xs sm:text-sm">
                 {format.label}
               </span>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* CTA Buttons */}
-        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
+        >
           <ModernButton variant="primary" size="md" className="w-full sm:w-auto">
             Start Free Trial
           </ModernButton>
           <ModernButton variant="secondary" size="md" className="w-full sm:w-auto">
             View Demo
           </ModernButton>
-        </div>
+        </motion.div>
 
         {/* Trust badges */}
-        <div className="mt-10 sm:mt-12 flex flex-col items-center gap-3">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.75 }}
+          className="mt-10 sm:mt-12 flex flex-col items-center gap-3"
+        >
           <p className="font-[family-name:var(--font-cabin)] text-white/40 text-xs sm:text-sm">
             Trusted by 50,000+ professionals worldwide
           </p>
           <div className="flex items-center gap-3 sm:gap-4">
-            {["SOC 2", "GDPR", "256-bit SSL"].map((badge) => (
-              <div
+            {["SOC 2", "GDPR", "256-bit SSL"].map((badge, index) => (
+              <motion.div
                 key={badge}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
                 className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 font-[family-name:var(--font-cabin)] text-white/50 text-xs backdrop-blur-sm"
               >
                 {badge}
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

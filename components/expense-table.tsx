@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { 
-  Search, 
-  Filter, 
-  ChevronDown, 
-  ChevronUp, 
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
   ArrowUpDown,
   Download,
   Plus,
@@ -26,6 +26,8 @@ import {
   ChevronRight
 } from "lucide-react"
 import { ModernButton } from "./modern-button"
+import { motion } from "framer-motion"
+import { useScrollReveal } from "../hooks/use-scroll-reveal"
 
 type ExpenseCategory = 
   | "Food & Dining" 
@@ -127,6 +129,10 @@ export function ExpenseTable() {
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
 
+  const { ref: headerRef, isVisible: headerVisible } = useScrollReveal()
+  const { ref: statsRef } = useScrollReveal()
+  const { ref: tableRef, isVisible: tableVisible } = useScrollReveal()
+
   const categories: (ExpenseCategory | "All")[] = [
     "All", "Food & Dining", "Transportation", "Shopping", "Housing", 
     "Entertainment", "Travel", "Business", "Healthcare", "Utilities"
@@ -223,7 +229,13 @@ export function ExpenseTable() {
 
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-10">
+        <motion.div
+          ref={headerRef}
+          initial={{ opacity: 0, y: 24 }}
+          animate={headerVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-10"
+        >
           <div>
             <h2 className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-5xl">
               Expense Reports
@@ -242,11 +254,18 @@ export function ExpenseTable() {
               <span className="hidden sm:inline">Add Expense</span>
             </ModernButton>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <div className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-[#7b39fc]/30 transition-all duration-300 group">
+        <motion.div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          {/* Total Expenses */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.5, delay: 0 }}
+            className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-[#7b39fc]/30 transition-all duration-300 group"
+          >
             <div className="flex items-center gap-3 mb-2 sm:mb-3">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[#7b39fc]/20 flex items-center justify-center group-hover:bg-[#7b39fc]/30 transition-colors">
                 <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-[#9055ff]" />
@@ -261,9 +280,16 @@ export function ExpenseTable() {
               <span className="text-emerald-400">12.5%</span>
               <span className="text-white/40">vs last month</span>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-emerald-500/30 transition-all duration-300 group">
+          {/* Completed */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-emerald-500/30 transition-all duration-300 group"
+          >
             <div className="flex items-center gap-3 mb-2 sm:mb-3">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors">
                 <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
@@ -276,9 +302,16 @@ export function ExpenseTable() {
             <div className="flex items-center gap-1 mt-2 text-sm">
               <span className="text-white/40">{filteredAndSortedExpenses.filter(e => e.status === "Completed").length} transactions</span>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-amber-500/30 transition-all duration-300 group">
+          {/* Pending */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-amber-500/30 transition-all duration-300 group"
+          >
             <div className="flex items-center gap-3 mb-2 sm:mb-3">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
                 <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
@@ -292,11 +325,17 @@ export function ExpenseTable() {
               <TrendingDown className="w-4 h-4 text-amber-400" />
               <span className="text-amber-400">{filteredAndSortedExpenses.filter(e => e.status === "Pending").length} awaiting</span>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Search and Filters */}
-        <div className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl border border-white/5 overflow-hidden shadow-[0_0_60px_rgba(123,57,252,0.05)]">
+        <motion.div
+          ref={tableRef}
+          initial={{ opacity: 0, y: 24 }}
+          animate={tableVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl border border-white/5 overflow-hidden shadow-[0_0_60px_rgba(123,57,252,0.05)]"
+        >
           <div className="p-3 sm:p-4 border-b border-white/5">
             <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
               {/* Search */}
@@ -577,7 +616,7 @@ export function ExpenseTable() {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

@@ -1,4 +1,8 @@
+"use client"
+
 import { Twitter, Github, Linkedin, Youtube } from "lucide-react"
+import { motion } from "framer-motion"
+import { useScrollReveal } from "../hooks/use-scroll-reveal"
 
 const footerLinks = {
   Product: [
@@ -38,8 +42,10 @@ const socialLinks = [
 ]
 
 export function Footer() {
+  const { ref, isVisible } = useScrollReveal()
+
   return (
-    <footer className="relative bg-[#0c0a14] pt-16 sm:pt-20 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-[120px] overflow-hidden">
+    <footer ref={ref} className="relative bg-[#0c0a14] pt-16 sm:pt-20 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-[120px] overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Top gradient line */}
@@ -53,7 +59,12 @@ export function Footer() {
         <div className="absolute bottom-1/3 right-0 w-[150px] sm:w-[250px] h-[150px] sm:h-[250px] bg-[#4a2090]/10 rounded-full blur-[70px] sm:blur-[100px]" />
       </div>
       
-      <div className="relative max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={isVisible ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5 }}
+        className="relative max-w-7xl mx-auto"
+      >
         {/* Main Footer Content */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8 mb-12 sm:mb-16">
           {/* Logo & Description */}
@@ -152,7 +163,7 @@ export function Footer() {
             </a>
           </div>
         </div>
-      </div>
+      </motion.div>
     </footer>
   )
 }

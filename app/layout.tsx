@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Manrope, Cabin, Instrument_Serif, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { MotionConfig } from 'framer-motion'
 import './globals.css'
 
 const manrope = Manrope({ 
@@ -55,7 +56,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${manrope.variable} ${cabin.variable} ${instrumentSerif.variable} ${inter.variable} antialiased`}>
-        {children}
+        {/* reducedMotion="user" respects OS accessibility settings automatically */}
+        <MotionConfig reducedMotion="user">
+          {children}
+        </MotionConfig>
         <Analytics />
       </body>
     </html>
