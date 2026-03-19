@@ -19,7 +19,7 @@ export function SectionDivider() {
             className="absolute top-1/2 left-0 -translate-y-1/2 h-2 w-24 bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full blur-sm"
             initial={{ x: "-20%" }}
             animate={{ x: "120%" }}
-            transition={{ duration: 1.8, ease: "easeInOut" }}
+            transition={{ duration: 2, delay: 0.2, ease: "easeInOut" }}
           />
         )}
       </div>

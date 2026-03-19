@@ -73,7 +73,7 @@ export function WhyChooseSection() {
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#7b39fc]/20 to-[#9055ff]/10 border border-[#7b39fc]/30 mb-6 shadow-[0_0_30px_rgba(123,57,252,0.15)]"
           >
             <Sparkles className="w-4 h-4 text-[#9055ff]" />
@@ -83,7 +83,7 @@ export function WhyChooseSection() {
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
             className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-6xl mb-4 sm:mb-6"
           >
             Why choose{" "}
@@ -108,7 +108,7 @@ export function WhyChooseSection() {
                   key={reason}
                   initial={{ opacity: 0, x: -24 }}
                   animate={isVisible ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: index * 0.06 }}
+                  transition={{ duration: 0.5, delay: 0.25 + index * 0.06, ease: "easeOut" }}
                   className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#7b39fc]/30 transition-all duration-300 group"
                 >
                   <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-[#7b39fc] to-[#4a2090] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#7b39fc]/20 group-hover:shadow-[#7b39fc]/40 transition-shadow">
@@ -124,7 +124,7 @@ export function WhyChooseSection() {
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.5 }}
+              transition={{ duration: 0.6, delay: 0.65, ease: "easeOut" }}
               className="pt-6 sm:pt-8"
             >
               <ModernButton variant="primary" size="md" className="w-full sm:w-auto">
@@ -138,7 +138,7 @@ export function WhyChooseSection() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={isVisible ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
             className="rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 overflow-hidden order-1 lg:order-2 shadow-[0_0_60px_rgba(123,57,252,0.1)]"
           >
             <div className="p-4 sm:p-6 border-b border-white/10 bg-gradient-to-r from-[#7b39fc]/10 to-transparent">
@@ -167,7 +167,7 @@ export function WhyChooseSection() {
                       key={row.feature}
                       initial={{ opacity: 0, y: 12 }}
                       animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                      transition={{ duration: 0.5, delay: 0.2 + index * 0.05, ease: "easeOut" }}
                       className={`${index !== comparisons.length - 1 ? "border-b border-white/5" : ""} hover:bg-white/[0.02] transition-colors`}
                     >
                       <td className="p-3 sm:p-4 font-[family-name:var(--font-inter)] text-white/80 text-sm">

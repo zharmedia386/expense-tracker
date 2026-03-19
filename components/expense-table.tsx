@@ -10,6 +10,7 @@ import {
   Download,
   Plus,
   Calendar,
+  BarChart3,
   TrendingUp,
   TrendingDown,
   DollarSign,
@@ -233,12 +234,22 @@ export function ExpenseTable() {
           ref={headerRef}
           initial={{ opacity: 0, y: 24 }}
           animate={headerVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
           className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-10"
         >
           <div>
-            <h2 className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-5xl">
-              Expense Reports
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#7b39fc]/20 to-[#9055ff]/10 border border-[#7b39fc]/30 shadow-[0_0_30px_rgba(123,57,252,0.15)] mb-4">
+              <BarChart3 className="w-4 h-4 text-[#9055ff]" />
+              <span className="font-[family-name:var(--font-cabin)] text-sm text-[#9055ff]">Expense Dashboard</span>
+            </div>
+            <h2 className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-5xl text-balance">
+              Every dollar,{" "}
+              <em className="italic relative">
+                <span className="bg-gradient-to-r from-[#9055ff] via-[#c084fc] to-[#9055ff] bg-clip-text text-transparent">
+                  accounted for
+                </span>
+                <span className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#9055ff]/50 to-transparent" />
+              </em>
             </h2>
             <p className="mt-2 font-[family-name:var(--font-inter)] text-white/60 text-base sm:text-lg">
               Track, filter, and analyze all your expenses in one place
@@ -263,7 +274,7 @@ export function ExpenseTable() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.5, delay: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
             className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-[#7b39fc]/30 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3 mb-2 sm:mb-3">
@@ -287,7 +298,7 @@ export function ExpenseTable() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
             className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-emerald-500/30 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3 mb-2 sm:mb-3">
@@ -309,7 +320,7 @@ export function ExpenseTable() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
             className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:border-amber-500/30 transition-all duration-300 group"
           >
             <div className="flex items-center gap-3 mb-2 sm:mb-3">
@@ -333,7 +344,7 @@ export function ExpenseTable() {
           ref={tableRef}
           initial={{ opacity: 0, y: 24 }}
           animate={tableVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
           className="bg-gradient-to-br from-[#1a1625] to-[#13101c] rounded-xl sm:rounded-2xl border border-white/5 overflow-hidden shadow-[0_0_60px_rgba(123,57,252,0.05)]"
         >
           <div className="p-3 sm:p-4 border-b border-white/5">

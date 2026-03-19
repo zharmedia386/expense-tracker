@@ -102,10 +102,19 @@ export function TestimonialsSection() {
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-16">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#7b39fc]/20 to-[#9055ff]/10 border border-[#7b39fc]/30 shadow-[0_0_30px_rgba(123,57,252,0.15)] mb-6"
+          >
+            <Star className="w-4 h-4 text-[#9055ff]" />
+            <span className="font-[family-name:var(--font-cabin)] text-sm text-[#9055ff]">Trusted by teams</span>
+          </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 24 }}
             animate={isVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
             className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-6xl mb-4 sm:mb-6"
           >
             Loved by{" "}
@@ -131,7 +140,7 @@ export function TestimonialsSection() {
               key={testimonial.author}
               initial={{ opacity: 0, y: 24 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
+              transition={{ duration: 0.6, delay: 0.2 + index * 0.08, ease: "easeOut" }}
               className="group relative p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-[#7b39fc]/40 transition-all duration-300 hover:-translate-y-1"
             >
               {/* Hover glow */}
@@ -182,7 +191,7 @@ export function TestimonialsSection() {
               key={stat.label}
               initial={{ opacity: 0 }}
               animate={statsVisible ? { opacity: 1 } : {}}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
               className="relative text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/5 overflow-hidden group hover:border-[#7b39fc]/30 transition-all duration-300"
             >
               {/* Hover glow */}
