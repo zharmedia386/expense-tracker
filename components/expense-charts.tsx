@@ -14,25 +14,26 @@ import {
   Bar,
   Cell
 } from "recharts"
+import { useAnalytics } from "@/hooks/use-analytics"
 
-const data = [
-  { name: "Mon", amount: 2400 },
-  { name: "Tue", amount: 1398 },
-  { name: "Wed", amount: 9800 },
-  { name: "Thu", amount: 3908 },
-  { name: "Fri", amount: 4800 },
-  { name: "Sat", amount: 3800 },
-  { name: "Sun", amount: 4300 },
+const placeholderWeekly = [
+  { name: "Mon", amount: 0 },
+  { name: "Tue", amount: 0 },
+  { name: "Wed", amount: 0 },
+  { name: "Thu", amount: 0 },
+  { name: "Fri", amount: 0 },
+  { name: "Sat", amount: 0 },
+  { name: "Sun", amount: 0 },
 ]
 
-const categoryData = [
-  { name: "Food", value: 400, color: "#7b39fc" },
-  { name: "Transport", value: 300, color: "#9055ff" },
-  { name: "SaaS", value: 300, color: "#c084fc" },
-  { name: "Entertainment", value: 200, color: "#d8b4fe" },
+const placeholderCategory = [
+  { name: "No data", value: 1, color: "#7b39fc" },
 ]
 
 export function ExpenseCharts() {
+  const { data } = useAnalytics(6)
+  const weeklyData = data?.weeklySpending?.map(({ day, amount }) => ({ name: day, amount })) ?? placeholderWeekly
+  const categoryData = data?.categoryData?.length ? data.categoryData : placeholderCategory
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Area Chart - Main Spending Trend */}
@@ -45,7 +46,7 @@ export function ExpenseCharts() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h3 className="text-xl font-bold text-white">Spending Analytics</h3>
-            <p className="text-white/40 text-sm">Your cash flow for the last 7 days</p>
+            <p className="text-white/40 text-sm">Spending by day of week</p>
           </div>
           <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#7b39fc]">
             <option>Last 7 Days</option>
@@ -55,7 +56,7 @@ export function ExpenseCharts() {
 
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={weeklyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#7b39fc" stopOpacity={0.3}/>

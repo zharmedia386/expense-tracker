@@ -14,7 +14,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
   AreaChart,
   Area
 } from "recharts"
@@ -26,38 +25,46 @@ import {
   Zap,
   Calendar
 } from "lucide-react"
+import { useAnalytics } from "@/hooks/use-analytics"
 
-const monthlyData = [
-  { name: "Jan", spending: 4200, income: 5000 },
-  { name: "Feb", spending: 3800, income: 5000 },
-  { name: "Mar", spending: 5100, income: 5500 },
-  { name: "Apr", spending: 4600, income: 5500 },
-  { name: "May", spending: 3900, income: 5500 },
-  { name: "Jun", spending: 4800, income: 6000 },
+const placeholderMonthly = [
+  { name: "Jan", spending: 0 },
+  { name: "Feb", spending: 0 },
+  { name: "Mar", spending: 0 },
+  { name: "Apr", spending: 0 },
+  { name: "May", spending: 0 },
+  { name: "Jun", spending: 0 },
 ]
 
-const categoryData = [
-  { name: "Housing", value: 1500, color: "#7b39fc" },
-  { name: "Food", value: 800, color: "#9055ff" },
-  { name: "Transport", value: 400, color: "#c084fc" },
-  { name: "Entertainment", value: 600, color: "#e879f9" },
-  { name: "Shopping", value: 900, color: "#312e81" },
-  { name: "Others", value: 300, color: "#1e1b4b" },
+const placeholderCategory = [
+  { name: "No data", value: 1, color: "#7b39fc" },
 ]
 
-const weeklySpending = [
-  { day: "Mon", amount: 120 },
-  { day: "Tue", amount: 450 },
-  { day: "Wed", amount: 200 },
-  { day: "Thu", amount: 900 },
-  { day: "Fri", amount: 400 },
-  { day: "Sat", amount: 1100 },
-  { day: "Sun", amount: 300 },
+const placeholderWeekly = [
+  { day: "Mon", amount: 0 },
+  { day: "Tue", amount: 0 },
+  { day: "Wed", amount: 0 },
+  { day: "Thu", amount: 0 },
+  { day: "Fri", amount: 0 },
+  { day: "Sat", amount: 0 },
+  { day: "Sun", amount: 0 },
 ]
 
 export default function AnalyticsPage() {
+  const { data, loading, error } = useAnalytics(6)
+
+  const monthlyData = data?.monthlyData?.length ? data.monthlyData : placeholderMonthly
+  const categoryData = data?.categoryData?.length ? data.categoryData : placeholderCategory
+  const weeklySpending = data?.weeklySpending ?? placeholderWeekly
+  const spendingPeak = data?.spendingPeak ?? { amount: 0, day: "—" }
+
   return (
     <DashboardLayout>
+      {(error || loading) && (
+        <div className={`mb-4 px-4 py-2 rounded-xl text-sm ${error ? "bg-amber-500/10 text-amber-400" : "text-white/40"}`}>
+          {loading ? "Loading analytics..." : error}
+        </div>
+      )}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -92,14 +99,10 @@ export default function AnalyticsPage() {
           className="lg:col-span-2 p-8 rounded-[32px] bg-white/5 border border-white/10"
         >
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-bold text-white">Income vs Spending</h3>
+            <h3 className="text-xl font-bold text-white">Monthly Spending</h3>
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-[#7b39fc]" />
-                <span className="text-white/40">Income</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-white/20" />
                 <span className="text-white/40">Spending</span>
               </div>
             </div>
@@ -108,7 +111,7 @@ export default function AnalyticsPage() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={monthlyData}>
                 <defs>
-                  <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="colorSpending" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7b39fc" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="#7b39fc" stopOpacity={0}/>
                   </linearGradient>
@@ -132,8 +135,7 @@ export default function AnalyticsPage() {
                   contentStyle={{ backgroundColor: "#1c1927", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
                   itemStyle={{ color: "#fff" }}
                 />
-                <Area type="monotone" dataKey="income" stroke="#7b39fc" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={3} />
-                <Area type="monotone" dataKey="spending" stroke="rgba(255,255,255,0.2)" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
+                <Area type="monotone" dataKey="spending" stroke="#7b39fc" fillOpacity={1} fill="url(#colorSpending)" strokeWidth={3} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -195,8 +197,8 @@ export default function AnalyticsPage() {
             <Zap className="w-5 h-5 fill-current" />
             <h3 className="text-lg font-bold text-white">Spending Peak</h3>
           </div>
-          <p className="text-3xl font-bold text-white mb-2">$1,100</p>
-          <p className="text-white/40 text-sm mb-8">Highest spending day: <span className="text-white">Saturday</span></p>
+          <p className="text-3xl font-bold text-white mb-2">${spendingPeak.amount.toLocaleString()}</p>
+          <p className="text-white/40 text-sm mb-8">Highest spending day: <span className="text-white">{spendingPeak.day}</span></p>
           
           <div className="mt-auto h-24 w-full">
             <ResponsiveContainer width="100%" height="100%">
