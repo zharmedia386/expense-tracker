@@ -15,6 +15,7 @@ export async function GET(request: Request) {
   const status = searchParams.get("status")
   const from = searchParams.get("from")
   const to = searchParams.get("to")
+  const search = searchParams.get("search")?.trim()
   const limit = parseInt(searchParams.get("limit") ?? "100", 10)
   const offset = parseInt(searchParams.get("offset") ?? "0", 10)
 
@@ -29,6 +30,11 @@ export async function GET(request: Request) {
   if (status) query = query.eq("status", status)
   if (from) query = query.gte("expense_date", from)
   if (to) query = query.lte("expense_date", to)
+  if (search) {
+    query = query.or(
+      `description.ilike.%${search}%,merchant.ilike.%${search}%,category.ilike.%${search}%`
+    )
+  }
 
   const { data, error, count } = await query
 

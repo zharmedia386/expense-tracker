@@ -157,6 +157,32 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t border-white/5 bg-[#0c0a14] z-10">
           <div className="space-y-1">
             <Link
+              href="/dashboard/chat"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group overflow-hidden ${
+                pathname === "/dashboard/chat"
+                  ? "bg-[#7b39fc]/10 text-[#9055ff]"
+                  : "text-white/50 hover:bg-white/5 hover:text-white"
+              }`}
+              title={isCollapsed ? "AI Assistant" : ""}
+            >
+              <div className="relative">
+                <LayoutDashboard className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/chat" ? "text-[#9055ff]" : "text-gray-500 group-hover:text-white"}`} />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#7b39fc] rounded-full border border-[#0c0a14] animate-pulse" />
+              </div>
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }}
+                    className="whitespace-nowrap"
+                  >
+                    AI Assistant
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+            <Link
               href="/support"
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 hover:text-white transition-all overflow-hidden"
               title={isCollapsed ? "Support" : ""}

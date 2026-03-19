@@ -3,44 +3,84 @@
 import { useState, useEffect, useCallback } from "react"
 import type { Expense, ExpenseInsert, ExpenseUpdate } from "@/lib/expenses/types"
 
-export function useExpenses(filters?: { category?: string; status?: string; from?: string; to?: string }) {
+const DEFAULT_PAGE_SIZE = 10
+
+export interface UseExpensesOptions {
+  category?: string
+  status?: string
+  from?: string
+  to?: string
+  search?: string
+  pageSize?: number
+}
+
+export function useExpenses(filters?: UseExpensesOptions) {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [count, setCount] = useState(0)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchExpenses = useCallback(async (offset = 0, limit = 100) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const params = new URLSearchParams()
-      if (filters?.category) params.set("category", filters.category)
-      if (filters?.status) params.set("status", filters.status)
-      if (filters?.from) params.set("from", filters.from)
-      if (filters?.to) params.set("to", filters.to)
-      params.set("offset", String(offset))
-      params.set("limit", String(limit))
+  const pageSize = filters?.pageSize ?? DEFAULT_PAGE_SIZE
+  const totalPages = Math.ceil(count / pageSize) || 1
+  const hasNext = page < totalPages
+  const hasPrev = page > 1
+  const startItem = count === 0 ? 0 : (page - 1) * pageSize + 1
+  const endItem = Math.min(page * pageSize, count)
 
-      const res = await fetch(`/api/expenses?${params}`)
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.error ?? "Failed to fetch expenses")
+  const fetchExpenses = useCallback(
+    async (targetPage = 1) => {
+      setLoading(true)
+      setError(null)
+      const offset = (targetPage - 1) * pageSize
+      try {
+        const params = new URLSearchParams()
+        if (filters?.category) params.set("category", filters.category)
+        if (filters?.status) params.set("status", filters.status)
+        if (filters?.from) params.set("from", filters.from)
+        if (filters?.to) params.set("to", filters.to)
+        if (filters?.search) params.set("search", filters.search)
+        params.set("offset", String(offset))
+        params.set("limit", String(pageSize))
+
+        const res = await fetch(`/api/expenses?${params}`)
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          throw new Error(err.error ?? "Failed to fetch expenses")
+        }
+        const { data, count: total } = await res.json()
+        setExpenses(data ?? [])
+        setCount(total ?? 0)
+        setPage(targetPage)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Unknown error")
+        setExpenses([])
+        setCount(0)
+      } finally {
+        setLoading(false)
       }
-      const { data, count: total } = await res.json()
-      setExpenses(data ?? [])
-      setCount(total ?? 0)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error")
-      setExpenses([])
-      setCount(0)
-    } finally {
-      setLoading(false)
-    }
-  }, [filters?.category, filters?.status, filters?.from, filters?.to])
+    },
+    [
+      filters?.category,
+      filters?.status,
+      filters?.from,
+      filters?.to,
+      filters?.search,
+      pageSize,
+    ]
+  )
 
   useEffect(() => {
-    fetchExpenses()
+    fetchExpenses(1)
   }, [fetchExpenses])
+
+  const goToPage = useCallback(
+    (p: number) => {
+      const target = Math.max(1, p)
+      fetchExpenses(target)
+    },
+    [fetchExpenses]
+  )
 
   const createExpense = useCallback(async (data: ExpenseInsert): Promise<Expense | null> => {
     const res = await fetch("/api/expenses", {
@@ -88,7 +128,15 @@ export function useExpenses(filters?: { category?: string; status?: string; from
     count,
     loading,
     error,
-    refetch: () => fetchExpenses(),
+    page,
+    pageSize,
+    totalPages,
+    hasNext,
+    hasPrev,
+    startItem,
+    endItem,
+    refetch: () => fetchExpenses(page),
+    goToPage,
     createExpense,
     updateExpense,
     deleteExpense,

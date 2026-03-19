@@ -22,7 +22,7 @@ import { AddExpenseDialog } from "@/components/add-expense-dialog"
 
 export default function DashboardPage() {
   const [addOpen, setAddOpen] = React.useState(false)
-  const { expenses, loading: expensesLoading, createExpense, refetch } = useExpenses()
+  const { expenses, count: totalExpenses, loading: expensesLoading, createExpense, refetch } = useExpenses({ pageSize: 10 })
   const { data: analytics } = useAnalytics(6)
 
   const recentExpenses = expenses.slice(0, 5)
@@ -36,7 +36,7 @@ export default function DashboardPage() {
     {
       title: "Net Spending",
       value: `$${monthlyTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
-      change: `${expenses.length} transactions`,
+      change: `${totalExpenses} transactions`,
       trend: "down" as const,
       icon: DollarSign,
     },

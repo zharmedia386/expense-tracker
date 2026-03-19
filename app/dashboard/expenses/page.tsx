@@ -26,9 +26,34 @@ const statusLabel: Record<string, string> = {
 }
 
 export default function ExpensesPage() {
-  const [searchTerm, setSearchTerm] = React.useState("")
+  const [searchInput, setSearchInput] = React.useState("")
+  const [debouncedSearch, setDebouncedSearch] = React.useState("")
   const [addOpen, setAddOpen] = React.useState(false)
-  const { expenses, count, loading, error, createExpense, refetch } = useExpenses()
+  const [pageSize, setPageSize] = React.useState(10)
+
+  React.useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchInput), 300)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  const {
+    expenses,
+    count,
+    loading,
+    error,
+    page,
+    totalPages,
+    hasNext,
+    hasPrev,
+    startItem,
+    endItem,
+    createExpense,
+    refetch,
+    goToPage,
+  } = useExpenses({
+    pageSize,
+    search: debouncedSearch || undefined,
+  })
 
   return (
     <DashboardLayout>
@@ -70,8 +95,8 @@ export default function ExpensesPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-[#7b39fc] transition-colors" />
           <Input 
             placeholder="Search transactions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-10 bg-white/5 border-white/10 focus-visible:ring-[#7b39fc] text-sm h-11"
           />
         </div>
@@ -114,14 +139,7 @@ export default function ExpensesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {expenses
-                    .filter((e) =>
-                      !searchTerm ||
-                      e.merchant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      e.category.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map((expense) => {
+                  {expenses.map((expense) => {
                       const amt = Number(expense.amount)
                       const dateStr = new Date(expense.expense_date).toLocaleDateString("en-US", {
                         month: "short",
@@ -181,10 +199,40 @@ export default function ExpensesPage() {
               </table>
             </div>
             
-            <div className="px-8 py-6 border-t border-white/5 flex items-center justify-between">
-              <p className="text-xs text-white/20">
-                Showing <span className="text-white/40">{expenses.length}</span> of <span className="text-white/40">{count}</span> transactions
-              </p>
+            <div className="px-8 py-6 border-t border-white/5 flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <p className="text-xs text-white/20">
+                  Showing <span className="text-white/40">{startItem}-{endItem}</span> of <span className="text-white/40">{count}</span> transactions
+                </p>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white"
+                >
+                  {[10, 25, 50].map((n) => (
+                    <option key={n} value={n}>{n} per page</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={!hasPrev}
+                  onClick={() => goToPage(page - 1)}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs disabled:opacity-40 disabled:cursor-not-allowed text-white hover:bg-white/10 transition-all"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-white/40 px-2">
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  disabled={!hasNext}
+                  onClick={() => goToPage(page + 1)}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs disabled:opacity-40 disabled:cursor-not-allowed text-white hover:bg-white/10 transition-all"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </>
         )}
