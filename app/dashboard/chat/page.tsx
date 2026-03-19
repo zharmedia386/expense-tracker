@@ -213,14 +213,28 @@ export default function ChatBotPage() {
     <DashboardLayout>
       <div className="flex h-[calc(100vh-12rem)] max-w-6xl mx-auto border border-white/10 rounded-[40px] bg-white/[0.02] overflow-hidden backdrop-blur-sm relative">
         
+        {/* Mobile Backdrop */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+            />
+          )}
+        </AnimatePresence>
+
         {/* Chat History Sidebar */}
         <AnimatePresence initial={false}>
           {isSidebarOpen && (
             <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: 320 }}
-              exit={{ width: 0 }}
-              className="border-r border-white/5 bg-[#0c0a14]/40 flex flex-col overflow-hidden relative shrink-0"
+              initial={{ x: -320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -320, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="absolute md:relative z-40 md:z-auto h-full w-[280px] md:w-[320px] border-r border-white/5 bg-[#0c0a14] md:bg-[#0c0a14]/40 flex flex-col overflow-hidden shrink-0"
             >
               <div className="p-6 border-b border-white/5">
                 <ModernButton 
@@ -240,7 +254,10 @@ export default function ChatBotPage() {
                 {sessions.map((session) => (
                   <div
                     key={session.id}
-                    onClick={() => setCurrentSessionId(session.id)}
+                    onClick={() => {
+                      setCurrentSessionId(session.id)
+                      if (window.innerWidth < 768) setIsSidebarOpen(false)
+                    }}
                     className={`group relative p-4 rounded-2xl cursor-pointer transition-all border ${
                       currentSessionId === session.id 
                         ? "bg-[#7b39fc]/10 border-[#7b39fc]/30 text-white" 
@@ -269,7 +286,7 @@ export default function ChatBotPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1c1927]/90 p-1 rounded-lg backdrop-blur-sm">
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-[#1c1927]/90 p-1 rounded-lg backdrop-blur-sm">
                       <button 
                         onClick={(e) => startEditing(session, e)}
                         className="p-1 hover:text-[#9055ff]"
@@ -291,13 +308,13 @@ export default function ChatBotPage() {
         </AnimatePresence>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 bg-[#0c0a14]/20 md:bg-transparent">
           {/* Chat Header */}
-          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[#0c0a14]/50">
-            <div className="flex items-center gap-4">
+          <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between bg-[#0c0a14]/50">
+            <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
               <button 
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all mr-2"
+                className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all shrink-0"
               >
                 <div className="w-5 h-5 flex flex-col justify-center gap-1">
                   <span className={`h-0.5 bg-current transition-all ${isSidebarOpen ? 'w-5' : 'w-3'}`} />
@@ -305,43 +322,43 @@ export default function ChatBotPage() {
                   <span className={`h-0.5 bg-current transition-all ${isSidebarOpen ? 'w-5' : 'w-4'}`} />
                 </div>
               </button>
-              <div className="w-12 h-12 rounded-2xl bg-[#7b39fc]/20 flex items-center justify-center border border-[#7b39fc]/30 relative">
-                <Bot className="w-6 h-6 text-[#9055ff]" />
-                <div className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0c0a14] animate-pulse" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[#7b39fc]/20 flex items-center justify-center border border-[#7b39fc]/30 relative shrink-0">
+                <Bot className="w-5 h-5 md:w-6 md:h-6 text-[#9055ff]" />
+                <div className="absolute top-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-emerald-500 rounded-full border-2 border-[#0c0a14] animate-pulse" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-xl font-bold text-white tracking-tight truncate">
+                <h1 className="text-base md:text-xl font-bold text-white tracking-tight truncate">
                   {sessions.find(s => s.id === currentSessionId)?.title || "Financial Assistant"}
                 </h1>
-                <p className="text-xs text-emerald-400 font-medium">Online • Powered by AI</p>
+                <p className="text-[10px] md:text-xs text-emerald-400 font-medium">Online • Powered by AI</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="hidden sm:flex gap-2">
               <Sparkles className="w-5 h-5 text-[#9055ff] animate-pulse" />
             </div>
           </div>
 
           {/* Message Area */}
-          <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 md:y-8 custom-scrollbar">
             <AnimatePresence mode="popLayout">
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
-                  className={`flex gap-4 ${message.role === "user" ? "flex-row-reverse" : ""}`}
+                  className={`flex gap-3 md:gap-4 ${message.role === "user" ? "flex-row-reverse" : ""}`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0 border transition-all ${
                     message.role === "assistant" 
                       ? "bg-[#7b39fc]/10 border-[#7b39fc]/30 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-2px_4px_0_rgba(0,0,0,0.25)]" 
                       : "bg-white/5 border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
                   }`}>
-                    {message.role === "assistant" ? <Bot className="w-5 h-5 text-[#9055ff]" /> : <User className="w-5 h-5 text-white/70" />}
+                    {message.role === "assistant" ? <Bot className="w-4 h-4 md:w-5 md:h-5 text-[#9055ff]" /> : <User className="w-4 h-4 md:w-5 md:h-5 text-white/70" />}
                   </div>
                   
-                  <div className={`flex flex-col gap-2 max-w-[80%] ${message.role === "user" ? "items-end" : ""}`}>
-                    <div className={`p-5 rounded-[24px] text-sm leading-relaxed border transition-all ${
+                  <div className={`flex flex-col gap-1.5 md:gap-2 max-w-[85%] md:max-w-[80%] ${message.role === "user" ? "items-end" : ""}`}>
+                    <div className={`p-4 md:p-5 rounded-[20px] md:rounded-[24px] text-sm leading-relaxed border transition-all ${
                       message.role === "assistant" 
                         ? "bg-white/5 border-white/10 text-white rounded-tl-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-2px_4px_0_rgba(0,0,0,0.25)]" 
                         : "bg-[#7b39fc] border-white/20 text-white rounded-tr-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),inset_0_-2px_4px_0_rgba(0,0,0,0.3),0_10px_30px_rgba(123,57,252,0.3)]"
@@ -363,16 +380,16 @@ export default function ChatBotPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex gap-4"
+                  className="flex gap-3 md:gap-4"
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#7b39fc]/10 border border-[#7b39fc]/30 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-[#9055ff]" />
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#7b39fc]/10 border border-[#7b39fc]/30 flex items-center justify-center">
+                    <Bot className="w-4 h-4 md:w-5 md:h-5 text-[#9055ff]" />
                   </div>
-                  <div className="bg-white/5 border border-white/10 p-5 rounded-[24px] rounded-tl-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">
+                  <div className="bg-white/5 border border-white/10 p-4 md:p-5 rounded-[20px] md:rounded-[24px] rounded-tl-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">
                     <div className="flex gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#9055ff] animate-bounce [animation-delay:-0.3s]"></span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#9055ff] animate-bounce [animation-delay:-0.15s]"></span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#9055ff] animate-bounce"></span>
+                      <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-[#9055ff] animate-bounce [animation-delay:-0.3s]"></span>
+                      <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-[#9055ff] animate-bounce [animation-delay:-0.15s]"></span>
+                      <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-[#9055ff] animate-bounce"></span>
                     </div>
                   </div>
                 </motion.div>
@@ -382,18 +399,18 @@ export default function ChatBotPage() {
           </div>
 
           {/* Chat Input Area */}
-          <div className="p-6 md:p-10 border-t border-white/5 bg-[#0c0a14]/50 backdrop-blur-md">
+          <div className="p-4 md:p-10 border-t border-white/5 bg-[#0c0a14]/50 backdrop-blur-md">
             {messages.length < 3 && (
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-4 md:mb-6 overflow-x-auto no-scrollbar pb-2">
                 {SUGGESTED_PROMPTS.map((prompt, i) => (
                   <button
                     key={i}
                     onClick={() => handleSendMessage(prompt.text)}
-                    className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/50 hover:bg-[#7b39fc]/10 hover:border-[#7b39fc]/20 hover:text-[#9055ff] transition-all flex items-center gap-2 group"
+                    className="flex-none px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] md:text-xs text-white/50 hover:bg-[#7b39fc]/10 hover:border-[#7b39fc]/20 hover:text-[#9055ff] transition-all flex items-center gap-2 group whitespace-nowrap"
                   >
-                    <prompt.icon className="w-3.5 h-3.5" />
+                    <prompt.icon className="w-3 md:w-3.5 h-3 md:h-3.5" />
                     {prompt.text}
-                    <ChevronRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    <ChevronRight className="w-3 md:w-3.5 h-3 md:h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </button>
                 ))}
               </div>
@@ -406,28 +423,28 @@ export default function ChatBotPage() {
                   e.preventDefault()
                   handleSendMessage(input)
                 }}
-                className="relative flex items-center gap-4 bg-[#0c0a14] border border-white/10 rounded-2xl p-2 pl-6 focus-within:border-[#7b39fc]/50 transition-all shadow-2xl"
+                className="relative flex items-center gap-2 md:gap-4 bg-[#0c0a14] border border-white/10 rounded-2xl p-1.5 md:p-2 pl-4 md:pl-6 focus-within:border-[#7b39fc]/50 transition-all shadow-2xl"
               >
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask anything about your expenses..."
-                  className="bg-transparent border-none focus-visible:ring-0 text-white placeholder:text-white/20 h-10 p-0"
+                  placeholder="Ask anything..."
+                  className="bg-transparent border-none focus-visible:ring-0 text-white placeholder:text-white/20 h-9 md:h-10 p-0 text-sm md:text-base"
                 />
                 <ModernButton 
                   variant="primary" 
                   size="sm" 
-                  className="h-10 w-10 p-0 min-w-0 rounded-xl"
+                  className="h-9 w-9 md:h-10 md:w-10 p-0 min-w-0 rounded-xl"
                   disabled={!input.trim() || isTyping}
                 >
-                  <Send className="w-4.5 h-4.5" />
+                  <Send className="w-4 md:w-4.5 h-4 md:h-4.5" />
                 </ModernButton>
               </form>
             </div>
             
-            <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">
+            <div className="mt-3 md:mt-4 flex items-center justify-center gap-2 text-[9px] md:text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">
               <Sparkles className="w-3 h-3 text-[#7b39fc]" />
-              AI may provide inaccurate financial advice
+              AI Advice - Verify Data
             </div>
           </div>
         </div>
