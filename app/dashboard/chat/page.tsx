@@ -23,6 +23,7 @@ import { ModernButton } from "@/components/modern-button"
 import { Input } from "@/components/ui/input"
 import { ChatMarkdown } from "@/components/chat-markdown"
 import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
 
 interface Message {
   id: string
@@ -34,8 +35,7 @@ interface Message {
 interface ChatSession {
   id: string
   title: string
-  lastMessage?: string
-  timestamp: Date
+  created_at: string
 }
 
 const SUGGESTED_PROMPTS = [
@@ -66,33 +66,15 @@ function PieChartIcon(props: any) {
 }
 
 export default function ChatBotPage() {
-  const [sessions, setSessions] = React.useState<ChatSession[]>([
-    {
-      id: "1",
-      title: "Monthly Spending Analysis",
-      lastMessage: "Your spending in March is up by 12%...",
-      timestamp: new Date(),
-    },
-    {
-      id: "2",
-      title: "Saving for New Laptop",
-      lastMessage: "If you save Rp 500.000 every month...",
-      timestamp: new Date(Date.now() - 86400000),
-    },
-  ])
-  const [currentSessionId, setCurrentSessionId] = React.useState<string | null>("1")
+  const supabase = createClient()
+  const [sessions, setSessions] = React.useState<ChatSession[]>([])
+  const [currentSessionId, setCurrentSessionId] = React.useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true)
   const [editingSessionId, setEditingSessionId] = React.useState<string | null>(null)
   const [editTitle, setEditTitle] = React.useState("")
+  const [initialLoading, setInitialLoading] = React.useState(true)
 
-  const [messages, setMessages] = React.useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: "Hello! I'm your AI Financial Assistant. How can I help you manage your expenses today?\n\nYou can ask me for:\n- **Spending summaries**\n- **Top expense categories**\n- **Savings tips**\n- Or to guide you on adding new expenses",
-      timestamp: new Date(),
-    },
-  ])
+  const [messages, setMessages] = React.useState<Message[]>([])
   const [input, setInput] = React.useState("")
   const [isTyping, setIsTyping] = React.useState(false)
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
@@ -105,91 +87,185 @@ export default function ChatBotPage() {
     scrollToBottom()
   }, [messages, isTyping])
 
+  // Fetch initial sessions
+  React.useEffect(() => {
+    async function loadSessions() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setInitialLoading(false)
+        return
+      }
+
+      const { data } = await supabase
+        .from("chat_sessions")
+        .select("*")
+        .order("created_at", { ascending: false })
+      
+      if (data && data.length > 0) {
+        setSessions(data)
+        setCurrentSessionId(data[0].id)
+      } else {
+        setSessions([])
+      }
+      setInitialLoading(false)
+    }
+    loadSessions()
+  }, [])
+
+  // Fetch messages when currentSessionId changes
+  React.useEffect(() => {
+    async function loadMessages() {
+      if (!currentSessionId) {
+        setMessages([
+          {
+            id: "welcome",
+            role: "assistant",
+            content: "Hello! I'm your AI Financial Assistant. How can I help you manage your expenses today?\n\nYou can ask me for:\n- **Spending summaries**\n- **Top expense categories**\n- **Savings tips**\n- Or to guide you on adding new expenses",
+            timestamp: new Date(),
+          },
+        ])
+        return
+      }
+
+      const { data } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .eq("session_id", currentSessionId)
+        .order("created_at", { ascending: true })
+      
+      if (data) {
+        setMessages(data.map((m: any) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: new Date(m.created_at)
+        })))
+      }
+    }
+    loadMessages()
+  }, [currentSessionId])
+
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      toast.error("Please sign in to chat")
+      return
+    }
+
+    let sessionId = currentSessionId
+    
+    // Create new session if none exists
+    if (!sessionId) {
+      const { data: newSession, error: sError } = await supabase
+        .from("chat_sessions")
+        .insert({
+          user_id: user.id,
+          title: text.length > 30 ? text.substring(0, 30) + "..." : text
+        })
+        .select()
+        .single()
+      
+      if (sError) {
+        console.error("Session Error:", sError)
+        toast.error("Failed to start conversation. Please ensure chat tables exist.")
+        return
+      }
+      sessionId = newSession.id
+      setSessions([newSession, ...sessions])
+      setCurrentSessionId(sessionId)
+    }
+
+    // Optimistic UI for user message
+    const tempUserMsgId = Date.now().toString()
+    const userMsg: Message = {
+      id: tempUserMsgId,
       role: "user",
       content: text,
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    setMessages((prev) => [...prev.filter(m => m.id !== "welcome"), userMsg])
     setInput("")
     setIsTyping(true)
+
+    // Save user message to Supabase
+    await supabase.from("chat_messages").insert({
+      session_id: sessionId,
+      role: "user",
+      content: text
+    })
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [
-            { role: "system", content: "You are a helpful AI financial assistant for ExpenseAI. You assist users with expense tracking, summaries, and financial advice based on their data." },
-            ...messages.map(m => ({ role: m.role, content: m.content })),
-            { role: "user", content: text }
-          ],
+          messages: messages.filter(m => m.id !== "welcome").map(m => ({ role: m.role, content: m.content })).concat([{ role: "user", content: text }])
         }),
       })
 
-      if (response.status === 401) {
-        toast.error("Please sign in to use the AI assistant.")
-        return
-      }
-      if (response.status === 503) {
-        toast.error("AI service is temporarily unavailable.")
-        return
-      }
-      if (!response.ok) {
-        throw new Error("Failed to get response from AI")
-      }
+      if (!response.ok) throw new Error("AI service error")
 
       const data = await response.json()
-      
-      if (data.error) {
-        throw new Error(data.error)
-      }
+      if (data.error) throw new Error(data.error)
 
       const assistantContent = data.choices[0].message.content
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: assistantContent,
-        timestamp: new Date(),
-      }
+      // Save assistant message to Supabase
+      const { data: savedAssistantMsg, error: mError } = await supabase
+        .from("chat_messages")
+        .insert({
+          session_id: sessionId,
+          role: "assistant",
+          content: assistantContent
+        })
+        .select()
+        .single()
 
-      setMessages((prev) => [...prev, assistantMessage])
+      if (mError) throw mError
+
+      if (savedAssistantMsg) {
+        setMessages((prev) => [
+          ...prev, 
+          {
+            id: savedAssistantMsg.id,
+            role: "assistant",
+            content: assistantContent,
+            timestamp: new Date(savedAssistantMsg.created_at),
+          }
+        ])
+      }
     } catch (error) {
       console.error("Chat Error:", error)
-      toast.error("I'm having trouble connecting to my brain right now. Please try again later.")
+      toast.error("Something went wrong. Please check your connection.")
     } finally {
       setIsTyping(false)
     }
   }
 
   const handleNewChat = () => {
-    const newSession: ChatSession = {
-      id: Date.now().toString(),
-      title: "New Conversation",
-      timestamp: new Date(),
-    }
-    setSessions([newSession, ...sessions])
-    setCurrentSessionId(newSession.id)
+    setCurrentSessionId(null)
     setMessages([
       {
-        id: "1",
+        id: "welcome",
         role: "assistant",
         content: "Hello! I'm your AI Financial Assistant. How can I help you manage your expenses today?\n\nYou can ask me for:\n- **Spending summaries**\n- **Top expense categories**\n- **Savings tips**\n- Or to guide you on adding new expenses",
         timestamp: new Date(),
       },
     ])
+    if (window.innerWidth < 768) setIsSidebarOpen(false)
   }
 
-  const handleDeleteSession = (id: string, e: React.MouseEvent) => {
+  const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
+    const { error } = await supabase.from("chat_sessions").delete().eq("id", id)
+    if (error) {
+      toast.error("Failed to delete conversation")
+      return
+    }
+
     const newSessions = sessions.filter(s => s.id !== id)
     setSessions(newSessions)
     if (currentSessionId === id) {
@@ -204,7 +280,22 @@ export default function ChatBotPage() {
     setEditTitle(session.title)
   }
 
-  const saveTitle = (id: string) => {
+  const saveTitle = async (id: string) => {
+    if (!editTitle.trim()) {
+      setEditingSessionId(null)
+      return
+    }
+
+    const { error } = await supabase
+      .from("chat_sessions")
+      .update({ title: editTitle })
+      .eq("id", id)
+    
+    if (error) {
+      toast.error("Failed to rename conversation")
+      return
+    }
+
     setSessions(sessions.map(s => s.id === id ? { ...s, title: editTitle } : s))
     setEditingSessionId(null)
   }
@@ -251,7 +342,11 @@ export default function ChatBotPage() {
                 <div className="px-3 mb-2 text-[10px] uppercase tracking-[0.2em] font-bold text-white/20">
                   Recent History
                 </div>
-                {sessions.map((session) => (
+                {initialLoading ? (
+                  <div className="p-4 text-center text-white/20 text-xs">Loading sessions...</div>
+                ) : sessions.length === 0 ? (
+                  <div className="p-4 text-center text-white/20 text-xs italic">No history yet</div>
+                ) : sessions.map((session) => (
                   <div
                     key={session.id}
                     onClick={() => {
@@ -280,7 +375,7 @@ export default function ChatBotPage() {
                           <p className="text-sm font-medium truncate">{session.title}</p>
                         )}
                         <p className="text-[10px] opacity-40 mt-0.5">
-                          {session.timestamp.toLocaleDateString()}
+                          {new Date(session.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -400,7 +495,7 @@ export default function ChatBotPage() {
 
           {/* Chat Input Area */}
           <div className="p-4 md:p-10 border-t border-white/5 bg-[#0c0a14]/50 backdrop-blur-md">
-            {messages.length < 3 && (
+            {!currentSessionId && messages.length < 2 && (
               <div className="flex flex-wrap gap-2 mb-4 md:mb-6 overflow-x-auto no-scrollbar pb-2">
                 {SUGGESTED_PROMPTS.map((prompt, i) => (
                   <button
