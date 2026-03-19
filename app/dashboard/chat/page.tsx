@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { ModernButton } from "@/components/modern-button"
 import { Input } from "@/components/ui/input"
+import { ChatMarkdown } from "@/components/chat-markdown"
 import { toast } from "sonner"
 
 interface Message {
@@ -31,7 +32,7 @@ const SUGGESTED_PROMPTS = [
   { text: "Summarize my spending for the last 30 days", icon: PieChartIcon },
   { text: "How can I save more money next month?", icon: TrendingUp },
   { text: "Show my top 5 expense categories", icon: FileText },
-  { text: "Add a new expense for Office Supplies ($45)", icon: Plus },
+  { text: "Add a new expense for Office Supplies (Rp 45.000)", icon: Plus },
 ]
 
 function PieChartIcon(props: any) {
@@ -59,7 +60,7 @@ export default function ChatBotPage() {
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I'm your AI Financial Assistant. How can I help you manage your expenses today? You can ask me for summaries, savings tips, or even to record new expenses.",
+      content: "Hello! I'm your AI Financial Assistant. How can I help you manage your expenses today?\n\nYou can ask me for:\n- **Spending summaries**\n- **Top expense categories**\n- **Savings tips**\n- Or to guide you on adding new expenses",
       timestamp: new Date(),
     },
   ])
@@ -105,8 +106,16 @@ export default function ChatBotPage() {
         }),
       })
 
+      if (response.status === 401) {
+        toast.error("Please sign in to use the AI assistant.")
+        return
+      }
+      if (response.status === 503) {
+        toast.error("AI service is temporarily unavailable.")
+        return
+      }
       if (!response.ok) {
-        throw new Error("Failed to get response from AI proxy")
+        throw new Error("Failed to get response from AI")
       }
 
       const data = await response.json()
@@ -185,7 +194,11 @@ export default function ChatBotPage() {
                       ? "bg-white/5 border-white/10 text-white rounded-tl-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-2px_4px_0_rgba(0,0,0,0.25)]" 
                       : "bg-[#7b39fc] border-white/20 text-white rounded-tr-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),inset_0_-2px_4px_0_rgba(0,0,0,0.3),0_10px_30px_rgba(123,57,252,0.3)]"
                   }`}>
-                    {message.content}
+                    {message.role === "assistant" ? (
+                      <ChatMarkdown content={message.content} />
+                    ) : (
+                      message.content
+                    )}
                   </div>
                   <span className="text-[10px] text-white/20 px-2">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
