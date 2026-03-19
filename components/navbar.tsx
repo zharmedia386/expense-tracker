@@ -1,13 +1,25 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, Menu, X } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { ChevronDown, LayoutDashboard, Menu, Settings, LogOut, X } from "lucide-react"
 import Image from "next/image"
+import { createClient } from "@/lib/supabase/client"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { ModernButton } from "./modern-button"
 
 export function Navbar() {
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [user, setUser] = useState<{ full_name?: string } | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +28,37 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    async function setUserFromAuth(authUser: { id: string; email?: string; user_metadata?: { full_name?: string } } | null) {
+      if (!authUser) {
+        setUser(null)
+        return
+      }
+      let fullName = authUser.user_metadata?.full_name
+      if (!fullName) {
+        const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", authUser.id).single()
+        fullName = profile?.full_name || authUser.email?.split("@")[0] || "User"
+      }
+      setUser({ full_name: fullName })
+    }
+
+    supabase.auth.getUser().then(({ data: { user } }) => setUserFromAuth(user))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserFromAuth(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function handleLogout() {
+    await createClient().auth.signOut()
+    setUser(null)
+    setMobileMenuOpen(false)
+    router.push("/")
+    router.refresh()
+  }
 
   return (
     <>
@@ -44,38 +87,84 @@ export function Navbar() {
 
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-8 ml-12">
-            <a
-              href="#"
+            <Link
+              href="/"
               className="font-[family-name:var(--font-manrope)] font-medium text-sm text-white hover:text-[#9055ff] transition-colors"
             >
               Home
-            </a>
+            </Link>
             <button className="flex items-center gap-1 font-[family-name:var(--font-manrope)] font-medium text-sm text-white hover:text-[#9055ff] transition-colors">
               Services
               <ChevronDown className="w-4 h-4" />
             </button>
-            <a
-              href="#"
+            <Link
+              href="/#reviews"
               className="font-[family-name:var(--font-manrope)] font-medium text-sm text-white hover:text-[#9055ff] transition-colors"
             >
               Reviews
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/#about"
               className="font-[family-name:var(--font-manrope)] font-medium text-sm text-white hover:text-[#9055ff] transition-colors"
             >
               Contact us
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Action Buttons */}
           <div className="hidden lg:flex items-center gap-3 ml-auto">
-            <ModernButton variant="ghost" size="sm">
-              Sign In
-            </ModernButton>
-            <ModernButton variant="primary" size="sm">
-              Get Started
-            </ModernButton>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-3 pl-2 pr-2 py-1.5 rounded-xl group cursor-pointer hover:bg-white/5 transition-colors">
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-white group-hover:text-[#9055ff] transition-colors">
+                        {user.full_name}
+                      </p>
+                      <p className="text-[10px] text-white/40 uppercase tracking-wider">Pro Plan</p>
+                    </div>
+                    <Avatar className="h-9 w-9 border-2 border-white/10 group-hover:border-[#7b39fc] transition-all">
+                      <AvatarImage src="https://avatars.githubusercontent.com/u/124599?v=4" />
+                      <AvatarFallback>
+                        {user.full_name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <ChevronDown className="w-4 h-4 text-white/40" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-[#0c0a14] border-white/10 text-white">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="cursor-pointer focus:bg-white/10">
+                      <LayoutDashboard className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings" className="cursor-pointer focus:bg-white/10">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer focus:bg-red-500/20 text-red-400">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/login">
+                  <ModernButton variant="ghost" size="sm">
+                    Sign In
+                  </ModernButton>
+                </Link>
+                <Link href="/register">
+                  <ModernButton variant="primary" size="sm">
+                    Get Started
+                  </ModernButton>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -111,40 +200,84 @@ export function Navbar() {
             </div>
 
             <div className="flex flex-col gap-6">
-              <a
-                href="#"
+              <Link
+                href="/"
                 className="font-[family-name:var(--font-manrope)] font-medium text-2xl text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
-              </a>
+              </Link>
               <button className="flex items-center gap-2 font-[family-name:var(--font-manrope)] font-medium text-2xl text-white text-left">
                 Services
                 <ChevronDown className="w-5 h-5" />
               </button>
-              <a
-                href="#"
+              <Link
+                href="/#reviews"
                 className="font-[family-name:var(--font-manrope)] font-medium text-2xl text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Reviews
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                href="/#about"
                 className="font-[family-name:var(--font-manrope)] font-medium text-2xl text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact us
-              </a>
+              </Link>
             </div>
 
             <div className="mt-auto flex flex-col gap-3">
-              <ModernButton variant="outline" size="md" className="w-full">
-                Sign In
-              </ModernButton>
-              <ModernButton variant="primary" size="md" className="w-full">
-                Get Started
-              </ModernButton>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors">
+                      <Avatar className="h-10 w-10 border-2 border-white/10">
+                        <AvatarImage src="https://avatars.githubusercontent.com/u/124599?v=4" />
+                        <AvatarFallback>
+                          {user.full_name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium text-white">{user.full_name}</p>
+                        <p className="text-xs text-white/40 uppercase tracking-wider">Pro Plan</p>
+                      </div>
+                      <ChevronDown className="w-5 h-5 text-white/40" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" side="top" className="w-full min-w-[var(--radix-dropdown-menu-trigger-width)] bg-[#0c0a14] border-white/10 text-white">
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="cursor-pointer focus:bg-white/10 py-3">
+                        <LayoutDashboard className="w-4 h-4 mr-3" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/settings" onClick={() => setMobileMenuOpen(false)} className="cursor-pointer focus:bg-white/10 py-3">
+                        <Settings className="w-4 h-4 mr-3" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer focus:bg-red-500/20 text-red-400 py-3">
+                      <LogOut className="w-4 h-4 mr-3" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <ModernButton variant="outline" size="md" className="w-full">
+                      Sign In
+                    </ModernButton>
+                  </Link>
+                  <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <ModernButton variant="primary" size="md" className="w-full">
+                      Get Started
+                    </ModernButton>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

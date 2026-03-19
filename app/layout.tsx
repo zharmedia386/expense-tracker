@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Manrope, Cabin, Instrument_Serif, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { MotionConfig } from 'framer-motion'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 const manrope = Manrope({ 
@@ -51,6 +52,7 @@ export default function RootLayout({
           {children}
         </MotionConfig>
         <Analytics />
+        <Toaster />
       </body>
     </html>
   )

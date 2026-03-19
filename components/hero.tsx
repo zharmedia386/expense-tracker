@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { ModernButton } from "./modern-button"
 import Image from "next/image"
 import { motion } from "framer-motion"
@@ -106,12 +107,16 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
         >
-          <ModernButton variant="primary" size="md" className="w-full sm:w-auto">
-            Start Free Trial
-          </ModernButton>
-          <ModernButton variant="secondary" size="md" className="w-full sm:w-auto">
-            View Demo
-          </ModernButton>
+          <Link href="/register">
+            <ModernButton variant="primary" size="md" className="w-full sm:w-auto">
+              Start Free Trial
+            </ModernButton>
+          </Link>
+          <Link href="/login">
+            <ModernButton variant="secondary" size="md" className="w-full sm:w-auto">
+              View Demo
+            </ModernButton>
+          </Link>
         </motion.div>
 
         {/* Trust badges */}

@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   LayoutDashboard, 
@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
+import { createClient } from "@/lib/supabase/client"
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -33,9 +34,11 @@ const navigation = [
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
   const [isCollapsed, setIsCollapsed] = React.useState(false)
   const [isMobile, setIsMobile] = React.useState(false)
+  const [user, setUser] = React.useState<{ full_name?: string; email?: string; avatar_url?: string } | null>(null)
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024)
@@ -43,6 +46,35 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
+
+  React.useEffect(() => {
+    async function fetchUser() {
+      const supabase = createClient()
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (authUser) {
+        let fullName = authUser.user_metadata?.full_name
+        let avatarUrl = authUser.user_metadata?.avatar_url
+        if (!fullName) {
+          const { data: profile } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", authUser.id).single()
+          fullName = profile?.full_name || authUser.email?.split("@")[0] || "User"
+          avatarUrl = profile?.avatar_url || avatarUrl
+        }
+        setUser({
+          full_name: fullName,
+          email: authUser.email,
+          avatar_url: avatarUrl,
+        })
+      }
+    }
+    fetchUser()
+  }, [])
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/login")
+    router.refresh()
+  }
 
   return (
     <div className="min-h-screen bg-[#0c0a14] text-white flex">
@@ -144,6 +176,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </AnimatePresence>
             </Link>
             <button 
+              onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all text-left overflow-hidden"
               title={isCollapsed ? "Logout" : ""}
             >
@@ -201,12 +234,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
             <div className="flex items-center gap-3 pl-2 group cursor-pointer">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-white group-hover:text-[#9055ff] transition-colors">Azhar</p>
-                <p className="text-[10px] text-white/40 uppercase tracking-wider">Pro Plan</p>
+                <p className="text-sm font-medium text-white group-hover:text-[#9055ff] transition-colors">
+                  {user?.full_name || "Loading..."}
+                </p>
+                <p className="text-[10px] text-white/40 uppercase tracking-wider">
+                  {user?.email ? "Pro Plan" : ""}
+                </p>
               </div>
               <Avatar className="h-10 w-10 border-2 border-white/10 group-hover:border-[#7b39fc] transition-all">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>AZ</AvatarFallback>
+                <AvatarImage src="https://avatars.githubusercontent.com/u/124599?v=4" />
+                <AvatarFallback>
+                  {user?.full_name
+                    ? user.full_name.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+                    : "U"}
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>

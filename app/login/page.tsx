@@ -2,24 +2,58 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { AuthLayout } from "@/components/auth-layout"
 import { ModernButton } from "@/components/modern-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { createClient } from "@/lib/supabase/client"
 import { Chrome, Github } from "lucide-react"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [redirectTo, setRedirectTo] = React.useState("/dashboard")
   const [isLoading, setIsLoading] = React.useState(false)
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setRedirectTo(params.get("redirect") || "/dashboard")
+  }, [])
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsLoading(true)
 
-    // Simulate login delay
-    setTimeout(() => {
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+
+    if (!email || !password) {
+      toast.error("Please fill in email and password")
       setIsLoading(false)
-      // window.location.href = "/dashboard"
-    }, 1500)
+      return
+    }
+
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
+      if (error) {
+        toast.error(error.message)
+        setIsLoading(false)
+        return
+      }
+
+      toast.success("Signed in successfully!")
+      router.push(redirectTo)
+      router.refresh()
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -34,6 +68,7 @@ export default function LoginPage() {
               <Label htmlFor="email" className="text-white/70">Email Address</Label>
               <Input
                 id="email"
+                name="email"
                 placeholder="name@example.com"
                 type="email"
                 autoCapitalize="none"
@@ -55,6 +90,7 @@ export default function LoginPage() {
               </div>
               <Input
                 id="password"
+                name="password"
                 placeholder="••••••••"
                 type="password"
                 autoComplete="current-password"

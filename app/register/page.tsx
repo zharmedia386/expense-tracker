@@ -2,23 +2,67 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { AuthLayout } from "@/components/auth-layout"
 import { ModernButton } from "@/components/modern-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { createClient } from "@/lib/supabase/client"
 import { Chrome, Github } from "lucide-react"
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [isLoading, setIsLoading] = React.useState(false)
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsLoading(true)
 
-    // Simulate register delay
-    setTimeout(() => {
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+    const fullName = formData.get("name") as string
+
+    if (!email || !password) {
+      toast.error("Please fill in email and password")
       setIsLoading(false)
-    }, 1500)
+      return
+    }
+
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      })
+
+      if (error) {
+        toast.error(error.message)
+        setIsLoading(false)
+        return
+      }
+
+      if (data?.user?.identities?.length === 0) {
+        toast.error("An account with this email already exists")
+        setIsLoading(false)
+        return
+      }
+
+      toast.success("Account created! Check your email to confirm.")
+      if (data.session) {
+        router.push("/dashboard")
+      }
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -33,6 +77,7 @@ export default function RegisterPage() {
               <Label htmlFor="name" className="text-white/70">Full Name</Label>
               <Input
                 id="name"
+                name="name"
                 placeholder="John Doe"
                 type="text"
                 autoCapitalize="words"
@@ -46,6 +91,7 @@ export default function RegisterPage() {
               <Label htmlFor="email" className="text-white/70">Email Address</Label>
               <Input
                 id="email"
+                name="email"
                 placeholder="name@example.com"
                 type="email"
                 autoCapitalize="none"
@@ -59,6 +105,7 @@ export default function RegisterPage() {
               <Label htmlFor="password" className="text-white/70">Password</Label>
               <Input
                 id="password"
+                name="password"
                 placeholder="••••••••"
                 type="password"
                 autoComplete="new-password"

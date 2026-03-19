@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Check, ArrowRight, Sparkles } from "lucide-react"
 import { ModernButton } from "./modern-button"
 import { motion } from "framer-motion"
@@ -127,10 +128,12 @@ export function WhyChooseSection() {
               transition={{ duration: 0.6, delay: 0.65, ease: "easeOut" }}
               className="pt-6 sm:pt-8"
             >
-              <ModernButton variant="primary" size="md" className="w-full sm:w-auto">
-                Get Started Free
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </ModernButton>
+              <Link href="/register">
+                <ModernButton variant="primary" size="md" className="w-full sm:w-auto">
+                  Get Started Free
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </ModernButton>
+              </Link>
             </motion.div>
           </div>
 
