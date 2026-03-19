@@ -27,6 +27,7 @@ import {
   ChevronRight
 } from "lucide-react"
 import { ModernButton } from "./modern-button"
+import { formatIDR } from "@/lib/currency"
 import { motion } from "framer-motion"
 import { useScrollReveal } from "../hooks/use-scroll-reveal"
 
@@ -284,7 +285,7 @@ export function ExpenseTable() {
               <span className="font-[family-name:var(--font-cabin)] text-white/60 text-sm">Total Expenses</span>
             </div>
             <p className="font-[family-name:var(--font-inter)] text-white text-2xl sm:text-3xl font-semibold">
-              ${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatIDR(totalExpenses)}
             </p>
             <div className="flex items-center gap-1 mt-2 text-sm">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -308,7 +309,7 @@ export function ExpenseTable() {
               <span className="font-[family-name:var(--font-cabin)] text-white/60 text-sm">Completed</span>
             </div>
             <p className="font-[family-name:var(--font-inter)] text-white text-2xl sm:text-3xl font-semibold">
-              ${completedExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatIDR(completedExpenses)}
             </p>
             <div className="flex items-center gap-1 mt-2 text-sm">
               <span className="text-white/40">{filteredAndSortedExpenses.filter(e => e.status === "Completed").length} transactions</span>
@@ -330,7 +331,7 @@ export function ExpenseTable() {
               <span className="font-[family-name:var(--font-cabin)] text-white/60 text-sm">Pending</span>
             </div>
             <p className="font-[family-name:var(--font-inter)] text-white text-2xl sm:text-3xl font-semibold">
-              ${filteredAndSortedExpenses.filter(e => e.status === "Pending").reduce((sum, exp) => sum + exp.amount, 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatIDR(filteredAndSortedExpenses.filter(e => e.status === "Pending").reduce((sum, exp) => sum + exp.amount, 0))}
             </p>
             <div className="flex items-center gap-1 mt-2 text-sm">
               <TrendingDown className="w-4 h-4 text-amber-400" />
@@ -523,7 +524,7 @@ export function ExpenseTable() {
                         </td>
                         <td className="p-4 text-right">
                           <span className="font-[family-name:var(--font-inter)] text-white font-semibold text-sm">
-                            ${expense.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            {formatIDR(expense.amount)}
                           </span>
                         </td>
                         <td className="p-4 text-center">
@@ -578,7 +579,7 @@ export function ExpenseTable() {
                         {new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                       <span className="font-[family-name:var(--font-inter)] text-white font-semibold">
-                        ${expense.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {formatIDR(expense.amount)}
                       </span>
                     </div>
                   </div>

@@ -15,6 +15,7 @@ import {
   Cell
 } from "recharts"
 import { useAnalytics } from "@/hooks/use-analytics"
+import { formatIDR } from "@/lib/currency"
 
 const placeholderWeekly = [
   { name: "Mon", amount: 0 },
@@ -84,6 +85,7 @@ export function ExpenseCharts() {
                   color: "#fff"
                 }} 
                 itemStyle={{ color: "#9055ff" }}
+                formatter={(value: number) => [formatIDR(value), "Amount"]}
               />
               <Area 
                 type="monotone" 
@@ -129,6 +131,7 @@ export function ExpenseCharts() {
                   borderColor: "#ffffff10", 
                   borderRadius: "12px",
                 }}
+                 formatter={(value: number) => [formatIDR(value), "Amount"]}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
                 {categoryData.map((entry, index) => (
@@ -146,7 +149,7 @@ export function ExpenseCharts() {
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                 <span className="text-white/60">{item.name}</span>
               </div>
-              <span className="text-white font-medium">${item.value}</span>
+              <span className="text-white font-medium">{formatIDR(item.value)}</span>
             </div>
           ))}
         </div>

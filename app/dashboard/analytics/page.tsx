@@ -26,6 +26,7 @@ import {
   Calendar
 } from "lucide-react"
 import { useAnalytics } from "@/hooks/use-analytics"
+import { formatIDR } from "@/lib/currency"
 
 const placeholderMonthly = [
   { name: "Jan", spending: 0 },
@@ -129,11 +130,12 @@ export default function AnalyticsPage() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `$${value}`}
+                  tickFormatter={(value) => formatIDR(value)}
                 />
                 <Tooltip 
                   contentStyle={{ backgroundColor: "#1c1927", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
                   itemStyle={{ color: "#fff" }}
+                  formatter={(value: number) => [formatIDR(value), "Spending"]}
                 />
                 <Area type="monotone" dataKey="spending" stroke="#7b39fc" fillOpacity={1} fill="url(#colorSpending)" strokeWidth={3} />
               </AreaChart>
@@ -169,6 +171,7 @@ export default function AnalyticsPage() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: "#1c1927", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
                   itemStyle={{ color: "#fff" }}
+                  formatter={(value: number) => [formatIDR(value), "Amount"]}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -180,7 +183,7 @@ export default function AnalyticsPage() {
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
                   <span className="text-sm text-white/60">{cat.name}</span>
                 </div>
-                <span className="text-sm font-bold text-white">${cat.value}</span>
+                <span className="text-sm font-bold text-white">{formatIDR(cat.value)}</span>
               </div>
             ))}
           </div>
@@ -197,7 +200,7 @@ export default function AnalyticsPage() {
             <Zap className="w-5 h-5 fill-current" />
             <h3 className="text-lg font-bold text-white">Spending Peak</h3>
           </div>
-          <p className="text-3xl font-bold text-white mb-2">${spendingPeak.amount.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-white mb-2">{formatIDR(spendingPeak.amount)}</p>
           <p className="text-white/40 text-sm mb-8">Highest spending day: <span className="text-white">{spendingPeak.day}</span></p>
           
           <div className="mt-auto h-24 w-full">
@@ -231,7 +234,7 @@ export default function AnalyticsPage() {
                 <h3 className="text-xl font-bold text-white">Savings Potential</h3>
               </div>
               <p className="text-white/70 leading-relaxed mb-6">
-                Based on your last 3 months, you could save up to <span className="text-white font-bold">$420/month</span> by optimizing your "Entertainment" subscriptions and switching to a weekly grocery plan.
+                Based on your last 3 months, you could save up to <span className="text-white font-bold">{formatIDR(420000)}/month</span> by optimizing your "Entertainment" subscriptions and switching to a weekly grocery plan.
               </p>
               <button className="flex items-center gap-2 text-white font-bold group-hover:gap-4 transition-all">
                 View AI Optimization Plan

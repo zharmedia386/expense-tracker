@@ -19,6 +19,7 @@ import { ModernButton } from "@/components/modern-button"
 import { useExpenses } from "@/hooks/use-expenses"
 import { useAnalytics } from "@/hooks/use-analytics"
 import { AddExpenseDialog } from "@/components/add-expense-dialog"
+import { formatIDR } from "@/lib/currency"
 
 export default function DashboardPage() {
   const [addOpen, setAddOpen] = React.useState(false)
@@ -35,21 +36,21 @@ export default function DashboardPage() {
   const stats = [
     {
       title: "Net Spending",
-      value: `$${monthlyTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      value: formatIDR(monthlyTotal),
       change: `${totalExpenses} transactions`,
       trend: "down" as const,
       icon: DollarSign,
     },
     {
       title: "Monthly Expenses",
-      value: `$${(analytics?.totals?.spending ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      value: formatIDR(analytics?.totals?.spending ?? 0),
       change: analytics?.categoryData?.length ? `${analytics.categoryData.length} categories` : "—",
       trend: "down" as const,
       icon: CreditCard,
     },
     {
       title: "Refunded",
-      value: `$${(analytics?.totals?.refunded ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      value: formatIDR(analytics?.totals?.refunded ?? 0),
       change: "—",
       trend: "up" as const,
       icon: TrendingUp,
@@ -171,7 +172,7 @@ export default function DashboardPage() {
                       <td className="py-5 pr-4 text-white/50">{row.category}</td>
                       <td className="py-5 pr-4 text-white/50">{dateStr}</td>
                       <td className="py-5 pr-4 text-right font-bold text-white">
-                        - ${Math.abs(amt).toLocaleString()}
+                        {formatIDR(-amt)}
                       </td>
                       <td className="py-5 text-right">
                         <Link href={`/dashboard/expenses?edit=${row.id}`}>

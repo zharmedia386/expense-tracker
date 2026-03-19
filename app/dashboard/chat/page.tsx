@@ -180,10 +180,10 @@ export default function ChatBotPage() {
                 </div>
                 
                 <div className={`flex flex-col gap-2 max-w-[80%] ${message.role === "user" ? "items-end" : ""}`}>
-                  <div className={`p-5 rounded-[24px] text-sm leading-relaxed border ${
+                  <div className={`p-5 rounded-[24px] text-sm leading-relaxed border transition-all ${
                     message.role === "assistant" 
-                      ? "bg-white/5 border-white/10 text-white rounded-tl-none" 
-                      : "bg-[#7b39fc] border-white/20 text-white rounded-tr-none shadow-[0_10px_30px_rgba(123,57,252,0.3)]"
+                      ? "bg-white/5 border-white/10 text-white rounded-tl-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-2px_4px_0_rgba(0,0,0,0.25)]" 
+                      : "bg-[#7b39fc] border-white/20 text-white rounded-tr-none shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),inset_0_-2px_4px_0_rgba(0,0,0,0.3),0_10px_30px_rgba(123,57,252,0.3)]"
                   }`}>
                     {message.content}
                   </div>

@@ -46,6 +46,11 @@ export async function PUT(
   const { id } = await params
   const body = (await request.json()) as ExpenseUpdate
 
+  // Explicitly block user_id changes - users can only modify their own data
+  if ("user_id" in body && body.user_id !== undefined) {
+    return NextResponse.json({ error: "Cannot change expense ownership" }, { status: 400 })
+  }
+
   const updates: Record<string, unknown> = {}
   if (body.description !== undefined) updates.description = body.description
   if (body.category !== undefined) updates.category = body.category

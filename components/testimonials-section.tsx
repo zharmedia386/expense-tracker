@@ -21,7 +21,7 @@ const testimonials = [
     rating: 5,
   },
   {
-    quote: "The insights helped me identify $200/mo in unused subscriptions. The app paid for itself in the first week.",
+    quote: "The insights helped me identify Rp 200.000/mo in unused subscriptions. The app paid for itself in the first week.",
     author: "Emma Watson",
     role: "Account Manager",
     company: "Marketing Co.",

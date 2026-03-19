@@ -107,14 +107,14 @@ export function AddExpenseDialog({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-white/60 text-sm">Amount</Label>
+              <Label className="text-white/60 text-sm">Amount (IDR)</Label>
               <Input
                 type="number"
                 step="0.01"
                 min="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
+                placeholder="e.g. 50000"
                 className="bg-white/5 border-white/10 mt-1 text-white"
                 required
               />

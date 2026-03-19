@@ -18,6 +18,7 @@ import { ModernButton } from "@/components/modern-button"
 import { Input } from "@/components/ui/input"
 import { useExpenses } from "@/hooks/use-expenses"
 import { AddExpenseDialog } from "@/components/add-expense-dialog"
+import { formatIDR } from "@/lib/currency"
 
 const statusLabel: Record<string, string> = {
   Completed: "Verified",
@@ -180,7 +181,7 @@ export default function ExpensesPage() {
                             </span>
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap text-right font-bold text-sm text-white">
-                            - ${Math.abs(amt).toLocaleString()}
+                            {formatIDR(-amt)}
                           </td>
                           <td className="px-8 py-5 whitespace-nowrap text-right">
                             <div className="flex items-center justify-end gap-2">
