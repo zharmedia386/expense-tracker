@@ -1,120 +1,164 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { useScrollReveal } from "@/hooks/use-scroll-reveal"
-import { useEffect, useState } from "react"
+import { Star, Quote } from "lucide-react"
 
 const testimonials = [
   {
     quote: "The AI categorization is frighteningly accurate. It saved me at least 5 hours of manual data entry every month.",
     author: "Sarah Jenkins",
     role: "Freelance Designer",
-    avatar: "https://i.pravatar.cc/150?u=sarah"
+    company: "Creative Agency",
+    avatar: "SJ",
+    rating: 5,
   },
   {
     quote: "Finally, an expense tracker that actually understands voice notes. I just talk to it while driving, and it's done.",
     author: "Michael Chen",
     role: "Sales Director",
-    avatar: "https://i.pravatar.cc/150?u=michael"
+    company: "TechFlow Inc.",
+    avatar: "MC",
+    rating: 5,
   },
   {
     quote: "The insights helped me identify $200/mo in unused subscriptions. The app paid for itself in the first week.",
-    author: "Emma Rodriguez",
-    role: "Marketing Manager",
-    avatar: "https://i.pravatar.cc/150?u=emma"
-  }
+    author: "Emma Watson",
+    role: "Account Manager",
+    company: "Marketing Co.",
+    avatar: "EW",
+    rating: 5,
+  },
+  {
+    quote: "We've reduced our expense processing time by 80% since switching to this platform. The ROI was evident within the first month.",
+    author: "David Park",
+    role: "CFO",
+    company: "StartupXYZ",
+    avatar: "DP",
+    rating: 5,
+  },
+  {
+    quote: "The multi-currency support is fantastic for our international team. Exchange rates are handled automatically and reports are always accurate.",
+    author: "Anna Kowalski",
+    role: "Operations Lead",
+    company: "EuroTech GmbH",
+    avatar: "AK",
+    rating: 5,
+  },
+  {
+    quote: "Finally, an expense tracker that understands context. It knows the difference between a business lunch and personal dining automatically.",
+    author: "James Liu",
+    role: "Product Manager",
+    company: "Innovation Labs",
+    avatar: "JL",
+    rating: 5,
+  },
 ]
-
-const stats = [
-  { label: "Active Users", value: 50000, suffix: "+" },
-  { label: "Expenses Tracked", value: 12, suffix: "M+" },
-  { label: "Hours Saved/mo", value: 15, suffix: "" },
-  { label: "Accuracy Rate", value: 99.9, suffix: "%" }
-]
-
-function CountUp({ value, suffix, isVisible }: { value: number; suffix: string; isVisible: boolean }) {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    if (!isVisible) return
-    
-    let start = 0
-    const end = value
-    const duration = 2000
-    const increment = end / (duration / 16)
-    
-    const timer = setInterval(() => {
-      start += increment
-      if (start >= end) {
-        setCount(end)
-        clearInterval(timer)
-      } else {
-        setCount(start)
-      }
-    }, 16)
-
-    return () => clearInterval(timer)
-  }, [isVisible, value])
-
-  return (
-    <span>
-      {Number.isInteger(value) ? Math.floor(count) : count.toFixed(1)}
-      {suffix}
-    </span>
-  )
-}
 
 export function TestimonialsSection() {
-  const { ref, isVisible } = useScrollReveal()
-
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-[120px]" id="reviews">
-      <div className="max-w-7xl mx-auto" ref={ref}>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-            Loved by thousands of <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7b39fc] to-[#bca1ff]">
-              smart spenders
-            </span>
+    <section className="relative bg-[#0c0a14] py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-[120px] overflow-hidden" id="reviews">
+      {/* Enhanced background effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Central glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] sm:w-[800px] h-[400px] sm:h-[600px] bg-[#7b39fc]/8 rounded-full blur-[120px] sm:blur-[180px]" />
+        
+        {/* Top accent */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] sm:w-[600px] h-[150px] sm:h-[200px] bg-[#9055ff]/10 rounded-full blur-[80px] sm:blur-[100px]" />
+        
+        {/* Floating orbs */}
+        <div className="absolute top-1/4 left-[10%] w-[80px] sm:w-[120px] h-[80px] sm:h-[120px] bg-[#7b39fc]/20 rounded-full blur-[40px] sm:blur-[60px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-[10%] w-[100px] sm:w-[150px] h-[100px] sm:h-[150px] bg-[#9055ff]/15 rounded-full blur-[50px] sm:blur-[70px] animate-pulse delay-500" />
+      </div>
+      
+      <div className="relative max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-6xl mb-4 sm:mb-6">
+            Loved by{" "}
+            <em className="italic relative inline-block">
+              <span className="bg-gradient-to-r from-[#9055ff] via-[#c084fc] to-[#e879f9] bg-clip-text text-transparent">
+                thousands
+              </span>
+              {/* Sparkle decorations */}
+              <svg className="absolute -top-2 -right-6 w-5 h-5 sm:w-6 sm:h-6 text-[#9055ff]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+              </svg>
+            </em>
           </h2>
-        </motion.div>
+          <p className="font-[family-name:var(--font-inter)] text-white/60 text-base sm:text-lg max-w-xl mx-auto px-4">
+            Join over 50,000 professionals who have simplified their expense management with our platform.
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+        {/* Testimonials Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {testimonials.map((testimonial, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={isVisible ? { opacity: 1, scale: 1 } : {}}
-              transition={{ delay: index * 0.15, duration: 0.5 }}
-              className="p-8 rounded-3xl bg-white/5 border border-white/10 flex flex-col h-full"
+            <div
+              key={testimonial.author}
+              className="group relative p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 hover:border-[#7b39fc]/40 transition-all duration-300 hover:-translate-y-1"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="flex-1">
-                <p className="text-white/80 italic mb-8 leading-relaxed">"{testimonial.quote}"</p>
+              {/* Hover glow */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#7b39fc]/10 to-[#9055ff]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              {/* Inner shadow */}
+              <div className="absolute inset-0 rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]" />
+              
+              {/* Quote icon */}
+              <Quote className="absolute top-4 right-4 w-6 h-6 sm:w-8 sm:h-8 text-[#7b39fc]/20" />
+              
+              {/* Rating */}
+              <div className="relative flex gap-0.5 sm:gap-1 mb-3 sm:mb-4">
+                {Array.from({ length: testimonial.rating }).map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-400" />
+                ))}
               </div>
-              <div className="flex items-center gap-4 border-t border-white/5 pt-6">
-                <img src={testimonial.avatar} alt={testimonial.author} className="w-12 h-12 rounded-full border border-[#7b39fc]/30" />
+              
+              {/* Quote */}
+              <p className="relative font-[family-name:var(--font-inter)] text-white/80 text-sm sm:text-base leading-relaxed mb-5 sm:mb-6">
+                "{testimonial.quote}"
+              </p>
+              
+              {/* Author */}
+              <div className="relative flex items-center gap-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#7b39fc] to-[#4a2090] flex items-center justify-center shadow-lg shadow-[#7b39fc]/20">
+                  <span className="font-[family-name:var(--font-cabin)] text-white text-xs sm:text-sm font-medium">
+                    {testimonial.avatar}
+                  </span>
+                </div>
                 <div>
-                  <h4 className="text-white font-bold">{testimonial.author}</h4>
-                  <p className="text-gray-500 text-sm">{testimonial.role}</p>
+                  <p className="font-[family-name:var(--font-manrope)] text-white font-semibold text-sm">
+                    {testimonial.author}
+                  </p>
+                  <p className="font-[family-name:var(--font-inter)] text-white/40 text-xs">
+                    {testimonial.role} at {testimonial.company}
+                  </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-y border-white/5 bg-white/[0.02] rounded-[40px] px-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                <CountUp value={stat.value} suffix={stat.suffix} isVisible={isVisible} />
-              </h3>
-              <p className="text-gray-500 text-sm font-medium uppercase tracking-wider">{stat.label}</p>
+        {/* Stats */}
+        <div className="mt-12 sm:mt-16 lg:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          {[
+            { value: "50K+", label: "Active Users" },
+            { value: "10M+", label: "Expenses Tracked" },
+            { value: "99.9%", label: "Uptime" },
+            { value: "4.9/5", label: "User Rating" },
+          ].map((stat, index) => (
+            <div
+              key={stat.label}
+              className="relative text-center p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/5 overflow-hidden group hover:border-[#7b39fc]/30 transition-all duration-300"
+            >
+              {/* Hover glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#7b39fc]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <p className="relative font-[family-name:var(--font-inter)] text-white text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                {stat.value}
+              </p>
+              <p className="relative font-[family-name:var(--font-cabin)] text-white/40 text-xs sm:text-sm">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
