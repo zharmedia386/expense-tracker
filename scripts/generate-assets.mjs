@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /**
- * Generate icons, logos, and avatars using Gemini (Nano Banana) API.
- * Run: node --env-file=.env scripts/generate-assets.mjs
- * Requires GEMINI_API_KEY in .env
+ * Generate icons and logos using Gemini API. Outputs to public/assets/
+ * Run: pnpm generate:assets [asset-name]
+ * Example: pnpm generate:assets logo
+ * Asset names: logo, icon-excel, icon-docs, icon-images, icon-text, icon-voice,
+ *              badge-soc2, badge-gdpr, badge-ssl, feature-instant, etc.
+ * If no arg: generates logo only.
  */
 
 import { GoogleGenAI } from "@google/genai"
@@ -11,126 +14,72 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const OUT_DIR = path.join(__dirname, "..", "public", "generated")
+const OUT_DIR = path.join(__dirname, "..", "public", "assets")
 const MODEL = "gemini-3.1-flash-image-preview"
 
-// Ensure output directory exists
+const ASSETS = {
+  logo: "A minimalist modern logo for an Expense Tracker / expense tracking app. Purple gradient (#9055ff to #6B2FD6), geometric abstract shape suggesting a chart or receipt, clean vector style, transparent or white background, square format. Professional fintech aesthetic.",
+  "icon-excel": "Excel spreadsheet icon, minimalist flat design, green accent, white background, 64x64 icon style",
+  "icon-docs": "Document icon, minimalist flat design, blue accent, white background, 64x64 icon style",
+  "icon-images": "Image/photo icon, minimalist flat design, pink accent, white background, 64x64 icon style",
+  "icon-text": "Text/document icon, minimalist flat design, amber accent, white background, 64x64 icon style",
+  "icon-voice": "Microphone/voice icon, minimalist flat design, purple accent, white background, 64x64 icon style",
+  "badge-soc2": "SOC 2 Type II certification badge logo, minimalist, professional, purple/gray tones, white background",
+  "badge-gdpr": "GDPR compliance badge logo, minimalist, professional, purple/gray tones, white background",
+  "badge-ssl": "256-bit SSL security lock badge logo, minimalist, professional, purple/gray tones, white background",
+}
+
 fs.mkdirSync(OUT_DIR, { recursive: true })
 
 const apiKey = process.env.GEMINI_API_KEY
 if (!apiKey) {
-  console.error("Missing GEMINI_API_KEY. Add it to .env or run: node --env-file=.env scripts/generate-assets.mjs")
+  console.error("Missing GEMINI_API_KEY in .env")
   process.exit(1)
 }
 
 const ai = new GoogleGenAI({ apiKey })
 
-async function generateImage(prompt, filename, retries = 3) {
+async function generateImage(prompt, filename) {
   console.log(`Generating: ${filename}...`)
-  for (let attempt = 1; attempt <= retries; attempt++) {
   try {
     const response = await ai.models.generateContent({
       model: MODEL,
       contents: prompt,
     })
 
-    const part = response.candidates?.[0]?.content?.parts?.find(
-      (p) => p.inlineData || p.inline_data
-    )
+    const part = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData || p.inline_data)
     const data = part?.inlineData || part?.inline_data
     if (!data?.data && !data?.imageBytes) {
-      console.error(`  No image in response for ${filename}. Try a different model or prompt.`)
+      console.error(`  No image in response.`)
       return false
     }
 
     const buffer = Buffer.from(data.data || data.imageBytes, "base64")
-    const outPath = path.join(OUT_DIR, filename)
-    fs.writeFileSync(outPath, buffer)
-    console.log(`  Saved: ${filename}`)
+    fs.writeFileSync(path.join(OUT_DIR, filename), buffer)
+    console.log(`  Saved: public/assets/${filename}`)
     return true
   } catch (err) {
-    const msg = typeof err === "string" ? err : err?.message || JSON.stringify(err)
-    const is429 = msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota")
-    const retryDelay = is429 ? 65000 : 2000
-    if (attempt < retries && is429) {
-      console.log(`  Quota exceeded. Waiting ${retryDelay / 1000}s before retry (${attempt}/${retries})...`)
-      await delay(retryDelay)
-    } else {
-      console.error(`  Error: ${msg.slice(0, 200)}`)
-      return false
-    }
+    console.error(`  Error:`, err?.message || err)
+    return false
   }
-  }
-  return false
-}
-
-function delay(ms) {
-  return new Promise((r) => setTimeout(r, ms))
 }
 
 async function main() {
-  console.log("Generating assets with Gemini API...\n")
+  const arg = process.argv[2] || "logo"
+  const target = arg.toLowerCase()
 
-  // 1. Project logo
-  await generateImage(
-    "A minimalist modern logo for an AI expense tracking app called ExpenseAI. Purple gradient (#9055ff to #6B2FD6), geometric abstract shape suggesting a chart or receipt, clean vector style, white/transparent background, square format. Professional fintech aesthetic.",
-    "logo.png"
-  )
-  await delay(1500)
-
-  // 2. Format icons (Excel, Docs, Images, Text, Voice)
-  const formatPrompts = [
-    ["Excel spreadsheet icon, minimalist flat design, green accent, white background, 64x64 icon style", "icon-excel.png"],
-    ["Document icon, minimalist flat design, blue accent, white background, 64x64 icon style", "icon-docs.png"],
-    ["Image/photo icon, minimalist flat design, pink accent, white background, 64x64 icon style", "icon-images.png"],
-    ["Text/document icon, minimalist flat design, amber accent, white background, 64x64 icon style", "icon-text.png"],
-    ["Microphone/voice icon, minimalist flat design, purple accent, white background, 64x64 icon style", "icon-voice.png"],
-  ]
-  for (const [prompt, filename] of formatPrompts) {
-    await generateImage(prompt, filename)
-    await delay(1500)
+  if (target === "logo" || target === "all") {
+    const list = target === "all" ? Object.entries(ASSETS) : [["logo", ASSETS.logo]]
+    for (const [name, prompt] of list) {
+      await generateImage(prompt, `${name}.png`)
+      if (list.length > 1) await new Promise((r) => setTimeout(r, 2000))
+    }
+  } else if (ASSETS[target]) {
+    await generateImage(ASSETS[target], `${target}.png`)
+  } else {
+    console.log("Unknown asset. Available:", Object.keys(ASSETS).join(", "))
+    console.log("\nUsage: pnpm generate:assets [logo|icon-excel|icon-docs|...|all]")
   }
-
-  // 3. Trust badge logos
-  const trustPrompts = [
-    ["SOC 2 Type II certification badge logo, minimalist, professional, purple/gray tones, white background, small badge style", "badge-soc2.png"],
-    ["GDPR compliance badge logo, minimalist, professional, purple/gray tones, white background, small badge style", "badge-gdpr.png"],
-    ["256-bit SSL security lock badge logo, minimalist, professional, purple/gray tones, white background, small badge style", "badge-ssl.png"],
-  ]
-  for (const [prompt, filename] of trustPrompts) {
-    await generateImage(prompt, filename)
-    await delay(1500)
-  }
-
-  // 4. Feature icons
-  const featurePrompts = [
-    ["Lightning bolt icon for instant processing, minimalist flat design, purple gradient, 64x64", "feature-instant.png"],
-    ["Shield/security icon for bank-grade security, minimalist flat design, emerald green, 64x64", "feature-security.png"],
-    ["Bar chart analytics icon for smart insights, minimalist flat design, blue gradient, 64x64", "feature-insights.png"],
-    ["Clock icon for subscription tracking, minimalist flat design, pink accent, 64x64", "feature-subscription.png"],
-    ["Rocket icon for future projections, minimalist flat design, purple accent, 64x64", "feature-projections.png"],
-    ["Globe icon for multi-currency, minimalist flat design, cyan accent, 64x64", "feature-currency.png"],
-  ]
-  for (const [prompt, filename] of featurePrompts) {
-    await generateImage(prompt, filename)
-    await delay(1500)
-  }
-
-  // 5. Testimonial avatars (realistic professional headshots)
-  const avatarPrompts = [
-    ["Professional headshot portrait of an Asian woman in her 30s, Finance Director, business casual, neutral background, photorealistic", "avatar-sarah.png"],
-    ["Professional headshot portrait of a Hispanic man in his 30s, Sales Executive, business casual, neutral background, photorealistic", "avatar-marcus.png"],
-    ["Professional headshot portrait of a Caucasian woman in her 30s, Account Manager, business casual, neutral background, photorealistic", "avatar-emily.png"],
-    ["Professional headshot portrait of an Asian man in his 40s, CFO, business suit, neutral background, photorealistic", "avatar-david.png"],
-    ["Professional headshot portrait of a Caucasian woman in her 30s, Operations Lead, business casual, neutral background, photorealistic", "avatar-anna.png"],
-    ["Professional headshot portrait of an Asian man in his 30s, Product Manager, business casual, neutral background, photorealistic", "avatar-james.png"],
-  ]
-  for (const [prompt, filename] of avatarPrompts) {
-    await generateImage(prompt, filename)
-    await delay(1500)
-  }
-
-  console.log("\nDone! Assets saved to public/generated/")
 }
 
 main().catch(console.error)

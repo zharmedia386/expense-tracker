@@ -3,20 +3,13 @@
 import { ModernButton } from "./modern-button"
 import { FileSpreadsheet, FileText, Image, MessageSquare, Mic } from "lucide-react"
 import { motion } from "framer-motion"
-import { GeneratedAsset } from "./generated-asset"
 
 const supportedFormats = [
-  { icon: FileSpreadsheet, label: "Excel", generated: "/generated/icon-excel.png" },
-  { icon: FileText, label: "Docs", generated: "/generated/icon-docs.png" },
-  { icon: Image, label: "Images", generated: "/generated/icon-images.png" },
-  { icon: MessageSquare, label: "Text", generated: "/generated/icon-text.png" },
-  { icon: Mic, label: "Voice", generated: "/generated/icon-voice.png" },
-]
-
-const trustBadges = [
-  { label: "SOC 2", generated: "/generated/badge-soc2.png" },
-  { label: "GDPR", generated: "/generated/badge-gdpr.png" },
-  { label: "256-bit SSL", generated: "/generated/badge-ssl.png" },
+  { icon: FileSpreadsheet, label: "Excel" },
+  { icon: FileText, label: "Docs" },
+  { icon: Image, label: "Images" },
+  { icon: MessageSquare, label: "Text" },
+  { icon: Mic, label: "Voice" },
 ]
 
 export function Hero() {
@@ -91,14 +84,7 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.36 + index * 0.06 }}
               className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
             >
-              <GeneratedAsset
-                src={format.generated}
-                alt={format.label}
-                width={16}
-                height={16}
-                className="w-4 h-4 object-contain"
-                fallback={<format.icon className="w-4 h-4 text-[#9055ff]" />}
-              />
+              <format.icon className="w-4 h-4 text-[#9055ff]" />
               <span className="font-[family-name:var(--font-cabin)] text-white/70 text-xs sm:text-sm">
                 {format.label}
               </span>
@@ -132,22 +118,15 @@ export function Hero() {
             Trusted by 50,000+ professionals worldwide
           </p>
           <div className="flex items-center gap-3 sm:gap-4">
-            {trustBadges.map((badge, index) => (
+            {["SOC 2", "GDPR", "256-bit SSL"].map((badge, index) => (
               <motion.div
-                key={badge.label}
+                key={badge}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
-                className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 font-[family-name:var(--font-cabin)] text-white/50 text-xs backdrop-blur-sm min-w-[70px]"
+                className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 font-[family-name:var(--font-cabin)] text-white/50 text-xs backdrop-blur-sm"
               >
-                <GeneratedAsset
-                  src={badge.generated}
-                  alt={badge.label}
-                  width={20}
-                  height={20}
-                  className="w-5 h-5 object-contain"
-                  fallback={<span>{badge.label}</span>}
-                />
+                {badge}
               </motion.div>
             ))}
           </div>
