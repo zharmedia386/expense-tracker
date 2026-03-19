@@ -35,6 +35,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
   const [isCollapsed, setIsCollapsed] = React.useState(false)
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#0c0a14] text-white flex">
@@ -42,7 +50,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <motion.aside 
         initial={false}
         animate={{ width: isCollapsed ? 80 : 256 }}
-        className="hidden lg:flex flex-col border-r border-white/5 bg-[#0c0a14] sticky top-0 h-screen z-40"
+        className="hidden lg:flex flex-col border-r border-white/5 bg-[#0c0a14] fixed top-0 left-0 h-screen z-40"
       >
         {/* Sidebar Header */}
         <div className="p-6 flex items-center justify-between gap-4 border-b border-white/5 bg-[#0c0a14] z-10">
@@ -158,7 +166,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </motion.aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <motion.main 
+        initial={false}
+        animate={{ paddingLeft: isMobile ? 0 : (isCollapsed ? 80 : 256) }}
+        className="flex-1 flex flex-col min-w-0 transition-all duration-300"
+      >
         {/* Header */}
         <header className="h-20 border-b border-white/5 flex items-center justify-between px-6 lg:px-10 bg-[#0c0a14]/80 backdrop-blur-xl sticky top-0 z-30">
           <div className="flex items-center gap-4">
@@ -206,7 +218,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </div>
-      </main>
+      </motion.main>
 
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
