@@ -42,27 +42,37 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <motion.aside 
         initial={false}
         animate={{ width: isCollapsed ? 80 : 256 }}
-        className="hidden lg:flex flex-col border-r border-white/5 bg-[#0c0a14] sticky top-0 h-screen transition-all z-40 overflow-hidden"
+        className="hidden lg:flex flex-col border-r border-white/5 bg-[#0c0a14] sticky top-0 h-screen z-40"
       >
-        <div className="p-6 flex items-center justify-between">
+        {/* Sidebar Header */}
+        <div className="p-6 flex items-center justify-between gap-4 border-b border-white/5 bg-[#0c0a14] z-10">
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image src="/assets/logo.png" alt="ExpenseAI" width={32} height={32} className="w-8 h-8 object-contain" />
             <AnimatePresence>
               {!isCollapsed && (
                 <motion.span 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="font-bold text-xl tracking-tight"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="font-bold text-xl tracking-tight whitespace-nowrap overflow-hidden"
                 >
                   ExpenseAI
                 </motion.span>
               )}
             </AnimatePresence>
           </Link>
+          
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all shrink-0"
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-1">
+        {/* Sidebar Navigation - Scrollable */}
+        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1 custom-scrollbar">
           {navigation.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -77,7 +87,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 title={isCollapsed ? item.name : ""}
               >
                 <item.icon className={`w-5 h-5 shrink-0 ${isActive ? "text-[#9055ff]" : "text-gray-500 group-hover:text-white"}`} />
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                   {!isCollapsed && (
                     <motion.span
                       initial={{ opacity: 0, x: -10 }}
@@ -103,29 +113,47 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 mt-auto border-t border-white/5 space-y-1">
-          <Link
-            href="/support"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 hover:text-white transition-all overflow-hidden"
-            title={isCollapsed ? "Support" : ""}
-          >
-            <HelpCircle className="w-5 h-5 text-gray-500 shrink-0" />
-            {!isCollapsed && <span>Support</span>}
-          </Link>
-          <button 
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all text-left overflow-hidden"
-            title={isCollapsed ? "Logout" : ""}
-          >
-            <LogOut className="w-5 h-5 shrink-0" />
-            {!isCollapsed && <span>Logout</span>}
-          </button>
-          
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/30 hover:bg-white/5 hover:text-white transition-all mt-4 border-t border-white/5 pt-4"
-          >
-            {isCollapsed ? <ChevronRight className="w-5 h-5 mx-auto" /> : <><ChevronLeft className="w-5 h-5" /> <span>Collapse</span></>}
-          </button>
+        {/* Sidebar Footer - Non-scrollable */}
+        <div className="p-4 border-t border-white/5 bg-[#0c0a14] z-10">
+          <div className="space-y-1">
+            <Link
+              href="/support"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/50 hover:bg-white/5 hover:text-white transition-all overflow-hidden"
+              title={isCollapsed ? "Support" : ""}
+            >
+              <HelpCircle className="w-5 h-5 text-gray-500 shrink-0" />
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }}
+                    className="whitespace-nowrap"
+                  >
+                    Support
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+            <button 
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/70 hover:bg-red-400/10 hover:text-red-400 transition-all text-left overflow-hidden"
+              title={isCollapsed ? "Logout" : ""}
+            >
+              <LogOut className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }}
+                    className="whitespace-nowrap"
+                  >
+                    Logout
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
         </div>
       </motion.aside>
 
