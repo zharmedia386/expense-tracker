@@ -268,7 +268,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </p>
               </div>
               <Avatar className="h-10 w-10 border-2 border-white/10 group-hover:border-[#7b39fc] transition-all">
-                <AvatarImage src="https://avatars.githubusercontent.com/u/124599?v=4" />
+                <AvatarImage src={user?.avatar_url || undefined} />
                 <AvatarFallback>
                   {user?.full_name
                     ? user.full_name.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -327,6 +327,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                     {item.name}
                   </Link>
                 ))}
+                <Link
+                  href="/dashboard/chat"
+                  className="flex items-center gap-3 px-4 py-4 rounded-2xl text-lg font-medium text-white/70 hover:bg-white/5 hover:text-white"
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  <LayoutDashboard className="w-6 h-6" />
+                  AI Assistant
+                </Link>
+                <Link
+                  href="/support"
+                  className="flex items-center gap-3 px-4 py-4 rounded-2xl text-lg font-medium text-white/70 hover:bg-white/5 hover:text-white"
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  <HelpCircle className="w-6 h-6" />
+                  Support
+                </Link>
               </nav>
             </motion.aside>
           </div>

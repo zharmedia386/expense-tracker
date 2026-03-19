@@ -32,7 +32,8 @@ const placeholderCategory = [
 ]
 
 export function ExpenseCharts() {
-  const { data } = useAnalytics(6)
+  const [months, setMonths] = React.useState(6)
+  const { data } = useAnalytics(months)
   const weeklyData = data?.weeklySpending?.map(({ day, amount }) => ({ name: day, amount })) ?? placeholderWeekly
   const categoryData = data?.categoryData?.length ? data.categoryData : placeholderCategory
   return (
@@ -49,9 +50,14 @@ export function ExpenseCharts() {
             <h3 className="text-xl font-bold text-white">Spending Analytics</h3>
             <p className="text-white/40 text-sm">Spending by day of week</p>
           </div>
-          <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#7b39fc]">
-            <option>Last 7 Days</option>
-            <option>Last 30 Days</option>
+          <select
+            value={months}
+            onChange={(e) => setMonths(Number(e.target.value))}
+            className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#7b39fc]"
+          >
+            <option value={1}>Last 1 Month</option>
+            <option value={3}>Last 3 Months</option>
+            <option value={6}>Last 6 Months</option>
           </select>
         </div>
 

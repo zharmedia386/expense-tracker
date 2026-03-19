@@ -123,6 +123,21 @@ export function useExpenses(filters?: UseExpensesOptions) {
     setCount((c) => Math.max(0, c - 1))
   }, [])
 
+  const exportAll = useCallback(async () => {
+    const params = new URLSearchParams()
+    if (filters?.category) params.set("category", filters.category)
+    if (filters?.status) params.set("status", filters.status)
+    if (filters?.from) params.set("from", filters.from)
+    if (filters?.to) params.set("to", filters.to)
+    if (filters?.search) params.set("search", filters.search)
+    params.set("limit", "5000")
+    params.set("offset", "0")
+    const res = await fetch(`/api/expenses?${params}`)
+    if (!res.ok) throw new Error("Failed to fetch expenses for export")
+    const { data } = await res.json()
+    return data ?? []
+  }, [filters?.category, filters?.status, filters?.from, filters?.to, filters?.search])
+
   return {
     expenses,
     count,
@@ -140,5 +155,6 @@ export function useExpenses(filters?: UseExpensesOptions) {
     createExpense,
     updateExpense,
     deleteExpense,
+    exportAll,
   }
 }

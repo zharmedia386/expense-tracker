@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
+import Link from "next/link"
 import {
   Search,
   Filter,
@@ -257,14 +258,18 @@ export function ExpenseTable() {
             </p>
           </div>
           <div className="flex gap-3">
-            <ModernButton variant="ghost" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Export</span>
-            </ModernButton>
-            <ModernButton variant="primary" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Add Expense</span>
-            </ModernButton>
+            <Link href="/dashboard">
+              <ModernButton variant="ghost" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Export</span>
+              </ModernButton>
+            </Link>
+            <Link href="/dashboard">
+              <ModernButton variant="primary" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Add Expense</span>
+              </ModernButton>
+            </Link>
           </div>
         </motion.div>
 

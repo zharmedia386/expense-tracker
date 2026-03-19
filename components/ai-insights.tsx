@@ -1,34 +1,71 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { motion } from "framer-motion"
-import { Sparkles, TrendingDown, Target, AlertCircle, ChevronRight } from "lucide-react"
-
-const insights = [
-  {
-    icon: TrendingDown,
-    title: "Spending reduces",
-    description: "Your weekend spending is down 12% compared to last month. Great job!",
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10"
-  },
-  {
-    icon: Target,
-    title: "Budget Goal",
-    description: "You're on track to save $450 this month if you maintain your current pace.",
-    color: "text-[#9055ff]",
-    bg: "bg-[#7b39fc]/10"
-  },
-  {
-    icon: AlertCircle,
-    title: "Unusual activity",
-    description: "We detected a $29.99 recurring charge for 'PixelStream'. Is this expected?",
-    color: "text-amber-400",
-    bg: "bg-amber-400/10"
-  }
-]
+import { Sparkles, TrendingDown, TrendingUp, Target, PieChart, ChevronRight } from "lucide-react"
+import { useAnalytics } from "@/hooks/use-analytics"
+import { formatIDR } from "@/lib/currency"
 
 export function AIInsights() {
+  const { data: analytics } = useAnalytics(6)
+
+  const insights = React.useMemo(() => {
+    const result: Array<{
+      icon: typeof TrendingDown
+      title: string
+      description: string
+      color: string
+      bg: string
+    }> = []
+
+    const monthlyData = analytics?.monthlyData ?? []
+    const totals = analytics?.totals
+    const categoryData = analytics?.categoryData ?? []
+
+    // 1. Spending trend: compare current vs previous month
+    if (monthlyData.length >= 2) {
+      const curr = monthlyData[monthlyData.length - 1]?.spending ?? 0
+      const prev = monthlyData[monthlyData.length - 2]?.spending ?? 0
+      const change = prev > 0 ? ((curr - prev) / prev) * 100 : 0
+      result.push({
+        icon: change <= 0 ? TrendingDown : TrendingUp,
+        title: change <= 0 ? "Spending reduced" : "Spending increased",
+        description:
+          change <= 0
+            ? `Your spending is down ${Math.abs(Math.round(change))}% compared to last month. Great job!`
+            : `Your spending is up ${Math.round(change)}% vs last month. Consider reviewing top categories.`,
+        color: change <= 0 ? "text-emerald-400" : "text-amber-400",
+        bg: change <= 0 ? "bg-emerald-400/10" : "bg-amber-400/10",
+      })
+    }
+
+    // 2. Net spending / totals summary
+    if (totals && (totals.spending > 0 || totals.refunded > 0)) {
+      result.push({
+        icon: Target,
+        title: "This period",
+        description: `Net spending: ${formatIDR(totals.net)} (spent ${formatIDR(totals.spending)}${totals.refunded > 0 ? `, refunded ${formatIDR(totals.refunded)}` : ""})`,
+        color: "text-[#9055ff]",
+        bg: "bg-[#7b39fc]/10",
+      })
+    }
+
+    // 3. Top category insight
+    if (categoryData.length > 0) {
+      const top = categoryData[0]
+      result.push({
+        icon: PieChart,
+        title: "Top category",
+        description: `Your highest spend is ${top.name} at ${formatIDR(top.value)}. Consider setting a budget for this category.`,
+        color: "text-[#9055ff]",
+        bg: "bg-[#7b39fc]/10",
+      })
+    }
+
+    return result
+  }, [analytics])
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -47,7 +84,10 @@ export function AIInsights() {
       </div>
 
       <div className="space-y-4">
-        {insights.map((insight, index) => (
+        {insights.length === 0 ? (
+          <p className="text-sm text-white/40 py-4">Add expenses to see AI-powered insights based on your spending.</p>
+        ) : (
+        insights.map((insight, index) => (
           <motion.div
             key={insight.title}
             initial={{ opacity: 0, y: 10 }}
@@ -68,12 +108,15 @@ export function AIInsights() {
               </div>
             </div>
           </motion.div>
-        ))}
+        ))
+        )}
       </div>
 
-      <button className="w-full mt-6 py-3 rounded-xl bg-white/5 text-white/60 text-xs font-medium hover:bg-white/10 hover:text-white transition-all border border-dashed border-white/10">
-        Ask AI anything...
-      </button>
+      <Link href="/dashboard/chat">
+        <button className="w-full mt-6 py-3 rounded-xl bg-white/5 text-white/60 text-xs font-medium hover:bg-white/10 hover:text-white transition-all border border-dashed border-white/10">
+          Ask AI anything...
+        </button>
+      </Link>
     </motion.div>
   )
 }

@@ -20,10 +20,13 @@ import { useExpenses } from "@/hooks/use-expenses"
 import { useAnalytics } from "@/hooks/use-analytics"
 import { AddExpenseDialog } from "@/components/add-expense-dialog"
 import { formatIDR } from "@/lib/currency"
+import { exportExpensesToCSV } from "@/lib/export-expenses"
+import { toast } from "sonner"
 
 export default function DashboardPage() {
   const [addOpen, setAddOpen] = React.useState(false)
-  const { expenses, count: totalExpenses, loading: expensesLoading, createExpense, refetch } = useExpenses({ pageSize: 10 })
+  const [reportLoading, setReportLoading] = React.useState(false)
+  const { expenses, count: totalExpenses, loading: expensesLoading, createExpense, refetch, exportAll } = useExpenses({ pageSize: 10 })
   const { data: analytics } = useAnalytics(6)
 
   const recentExpenses = expenses.slice(0, 5)
@@ -83,8 +86,29 @@ export default function DashboardPage() {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          <ModernButton variant="secondary" size="md" className="h-12 px-6">
-            Generate Report
+          <ModernButton
+            variant="secondary"
+            size="md"
+            className="h-12 px-6"
+            disabled={reportLoading}
+            onClick={async () => {
+              setReportLoading(true)
+              try {
+                const data = await exportAll()
+                if (data.length === 0) {
+                  toast.info("No expenses to export")
+                  return
+                }
+                exportExpensesToCSV(data)
+                toast.success(`Exported ${data.length} expenses`)
+              } catch {
+                toast.error("Failed to generate report")
+              } finally {
+                setReportLoading(false)
+              }
+            }}
+          >
+            {reportLoading ? "Generating..." : "Generate Report"}
           </ModernButton>
           <ModernButton variant="primary" size="md" className="h-12 px-6" onClick={() => setAddOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />

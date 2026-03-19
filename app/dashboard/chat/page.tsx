@@ -22,6 +22,16 @@ import {
 import { ModernButton } from "@/components/modern-button"
 import { Input } from "@/components/ui/input"
 import { ChatMarkdown } from "@/components/chat-markdown"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
 
@@ -73,6 +83,8 @@ export default function ChatBotPage() {
   const [editingSessionId, setEditingSessionId] = React.useState<string | null>(null)
   const [editTitle, setEditTitle] = React.useState("")
   const [initialLoading, setInitialLoading] = React.useState(true)
+  const [sessionToDelete, setSessionToDelete] = React.useState<string | null>(null)
+  const [isSeeding, setIsSeeding] = React.useState(false)
 
   const [messages, setMessages] = React.useState<Message[]>([])
   const [input, setInput] = React.useState("")
@@ -254,8 +266,17 @@ export default function ChatBotPage() {
     if (window.innerWidth < 768) setIsSidebarOpen(false)
   }
 
-  const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
+    setEditingSessionId(null)
+    setSessionToDelete(id)
+  }
+
+  const confirmDeleteSession = async () => {
+    const id = sessionToDelete
+    if (!id) return
+    setSessionToDelete(null)
+
     const res = await fetch(`/api/chat/sessions/${id}`, { method: "DELETE" })
     if (!res.ok) {
       toast.error("Failed to delete conversation")
@@ -270,6 +291,28 @@ export default function ChatBotPage() {
     toast.success("Conversation deleted")
   }
 
+  const handleSeedSamples = async () => {
+    setIsSeeding(true)
+    try {
+      const res = await fetch("/api/chat/seed", { method: "POST" })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        toast.error(err.error || "Failed to load sample chats")
+        return
+      }
+      const data = await res.json()
+      if (data.sessions?.length > 0) {
+        setSessions((prev) => [...data.sessions, ...prev])
+        setCurrentSessionId(data.sessions[0].id)
+        toast.success("Sample chats loaded")
+      }
+    } catch {
+      toast.error("Failed to load sample chats")
+    } finally {
+      setIsSeeding(false)
+    }
+  }
+
   const startEditing = (session: ChatSession, e: React.MouseEvent) => {
     e.stopPropagation()
     setEditingSessionId(session.id)
@@ -277,7 +320,13 @@ export default function ChatBotPage() {
   }
 
   const saveTitle = async (id: string) => {
-    if (!editTitle.trim()) {
+    const trimmed = editTitle.trim()
+    if (!trimmed) {
+      setEditingSessionId(null)
+      return
+    }
+    const existing = sessions.find((s) => s.id === id)?.title
+    if (existing === trimmed) {
       setEditingSessionId(null)
       return
     }
@@ -285,7 +334,7 @@ export default function ChatBotPage() {
     const res = await fetch(`/api/chat/sessions/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: editTitle }),
+      body: JSON.stringify({ title: trimmed }),
     })
 
     if (!res.ok) {
@@ -293,7 +342,7 @@ export default function ChatBotPage() {
       return
     }
 
-    setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, title: editTitle } : s)))
+    setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, title: trimmed } : s)))
     setEditingSessionId(null)
   }
 
@@ -336,13 +385,36 @@ export default function ChatBotPage() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
-                <div className="px-3 mb-2 text-[10px] uppercase tracking-[0.2em] font-bold text-white/20">
-                  Recent History
+                <div className="px-3 mb-2 flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/20">
+                    Recent History
+                  </span>
+                  {sessions.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleSeedSamples}
+                      disabled={isSeeding}
+                      className="text-[10px] text-[#7b39fc] hover:text-[#9055ff] transition-colors disabled:opacity-50"
+                    >
+                      {isSeeding ? "Loading..." : "+ Samples"}
+                    </button>
+                  )}
                 </div>
                 {initialLoading ? (
                   <div className="p-4 text-center text-white/20 text-xs">Loading sessions...</div>
                 ) : sessions.length === 0 ? (
-                  <div className="p-4 text-center text-white/20 text-xs italic">No history yet</div>
+                  <div className="p-4 space-y-3">
+                    <p className="text-center text-white/20 text-xs italic">No history yet</p>
+                    <ModernButton
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs"
+                      onClick={handleSeedSamples}
+                      disabled={isSeeding}
+                    >
+                      {isSeeding ? "Loading..." : "Load sample chats"}
+                    </ModernButton>
+                  </div>
                 ) : sessions.map((session) => (
                   <div
                     key={session.id}
@@ -386,7 +458,7 @@ export default function ChatBotPage() {
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button 
-                        onClick={(e) => handleDeleteSession(session.id, e)}
+                        onClick={(e) => handleDeleteClick(session.id, e)}
                         className="p-1 hover:text-red-400"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -541,6 +613,26 @@ export default function ChatBotPage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>
+        <AlertDialogContent className="bg-[#0c0a14] border-white/10 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60">
+              This will permanently delete this conversation. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-white/10 text-white/80">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteSession}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   )
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useSearchParams } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { motion } from "framer-motion"
 import { 
@@ -15,10 +16,24 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { ModernButton } from "@/components/modern-button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { useExpenses } from "@/hooks/use-expenses"
 import { AddExpenseDialog } from "@/components/add-expense-dialog"
 import { formatIDR } from "@/lib/currency"
+import { exportExpensesToCSV } from "@/lib/export-expenses"
+import { toast } from "sonner"
+import type { Expense, ExpenseCategory } from "@/lib/expenses/types"
+
+const CATEGORIES: ExpenseCategory[] = [
+  "Food & Dining", "Transportation", "Shopping", "Housing",
+  "Entertainment", "Travel", "Business", "Healthcare", "Utilities",
+]
 
 const statusLabel: Record<string, string> = {
   Completed: "Verified",
@@ -27,10 +42,18 @@ const statusLabel: Record<string, string> = {
 }
 
 export default function ExpensesPage() {
+  const searchParams = useSearchParams()
+  const editId = searchParams.get("edit")
   const [searchInput, setSearchInput] = React.useState("")
   const [debouncedSearch, setDebouncedSearch] = React.useState("")
   const [addOpen, setAddOpen] = React.useState(false)
   const [pageSize, setPageSize] = React.useState(10)
+  const [categoryFilter, setCategoryFilter] = React.useState<string>("")
+  const [dateFrom, setDateFrom] = React.useState("")
+  const [dateTo, setDateTo] = React.useState("")
+  const [exportLoading, setExportLoading] = React.useState(false)
+  const [editOpen, setEditOpen] = React.useState(false)
+  const [fetchedEditExpense, setFetchedEditExpense] = React.useState<Expense | null>(null)
 
   React.useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchInput), 300)
@@ -49,12 +72,43 @@ export default function ExpensesPage() {
     startItem,
     endItem,
     createExpense,
+    updateExpense,
+    deleteExpense,
     refetch,
     goToPage,
+    exportAll,
   } = useExpenses({
     pageSize,
     search: debouncedSearch || undefined,
+    category: categoryFilter || undefined,
+    from: dateFrom || undefined,
+    to: dateTo || undefined,
   })
+
+  const editExpense = expenses.find((e) => e.id === editId) ?? fetchedEditExpense
+
+  React.useEffect(() => {
+    if (!editId) {
+      setFetchedEditExpense(null)
+      return
+    }
+    const inList = expenses.some((e) => e.id === editId)
+    if (inList) {
+      setFetchedEditExpense(null)
+      return
+    }
+    let cancelled = false
+    fetch(`/api/expenses/${editId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!cancelled && data) setFetchedEditExpense(data)
+      })
+    return () => { cancelled = true }
+  }, [editId, expenses])
+
+  React.useEffect(() => {
+    if (editId && editExpense) setEditOpen(true)
+  }, [editId, editExpense])
 
   return (
     <DashboardLayout>
@@ -74,9 +128,30 @@ export default function ExpensesPage() {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          <ModernButton variant="secondary" size="md" className="h-11 px-4">
+          <ModernButton
+            variant="secondary"
+            size="md"
+            className="h-11 px-4"
+            disabled={exportLoading}
+            onClick={async () => {
+              setExportLoading(true)
+              try {
+                const data = await exportAll()
+                if (data.length === 0) {
+                  toast.info("No expenses to export")
+                  return
+                }
+                exportExpensesToCSV(data)
+                toast.success(`Exported ${data.length} expenses`)
+              } catch {
+                toast.error("Failed to export")
+              } finally {
+                setExportLoading(false)
+              }
+            }}
+          >
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {exportLoading ? "Exporting..." : "Export"}
           </ModernButton>
           <ModernButton variant="primary" size="md" className="h-11 px-6" onClick={() => setAddOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
@@ -101,15 +176,32 @@ export default function ExpensesPage() {
             className="pl-10 bg-white/5 border-white/10 focus-visible:ring-[#7b39fc] text-sm h-11"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-            <Calendar className="w-4 h-4" />
-            Date Range
-          </button>
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 h-11 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-            <Filter className="w-4 h-4" />
-            Category
-          </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="w-32 h-11 bg-white/5 border-white/10 text-sm text-white"
+            />
+            <span className="text-white/30">–</span>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="w-32 h-11 bg-white/5 border-white/10 text-sm text-white"
+            />
+          </div>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm"
+          >
+            <option value="">All Categories</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
       </motion.div>
 
@@ -185,9 +277,33 @@ export default function ExpensesPage() {
                           </td>
                           <td className="px-8 py-5 whitespace-nowrap text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <button className="p-2 text-white/30 hover:text-white hover:bg-white/10 rounded-lg transition-all">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="p-2 text-white/30 hover:text-white hover:bg-white/10 rounded-lg transition-all">
+                                    <MoreHorizontal className="w-4 h-4" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-[#0c0a14] border-white/10 text-white">
+                                  <DropdownMenuItem asChild>
+                                    <Link href={`/dashboard/expenses?edit=${expense.id}`} className="cursor-pointer">
+                                      Edit
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    variant="destructive"
+                                    className="cursor-pointer"
+                                    onClick={async () => {
+                                      if (confirm("Delete this expense?")) {
+                                        await deleteExpense(expense.id)
+                                        refetch()
+                                        toast.success("Expense deleted")
+                                      }
+                                    }}
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                               <Link href={`/dashboard/expenses?edit=${expense.id}`} className="p-2 text-white/30 hover:text-[#9055ff] hover:bg-[#7b39fc]/10 rounded-lg transition-all inline-flex">
                                 <ArrowUpRight className="w-4 h-4" />
                               </Link>
@@ -246,6 +362,21 @@ export default function ExpensesPage() {
           await createExpense(data)
           refetch()
         }}
+      />
+      <AddExpenseDialog
+        open={editOpen}
+        onOpenChange={(open) => {
+          setEditOpen(open)
+          if (!open) window.history.replaceState({}, "", "/dashboard/expenses")
+        }}
+        onSubmit={async () => {}}
+        onUpdate={async (id, data) => {
+          await updateExpense(id, data)
+          refetch()
+          setEditOpen(false)
+          window.history.replaceState({}, "", "/dashboard/expenses")
+        }}
+        expense={editExpense}
       />
     </DashboardLayout>
   )

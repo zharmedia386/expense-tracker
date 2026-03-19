@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ModernButton } from "@/components/modern-button"
-import type { ExpenseInsert, ExpenseCategory, ExpenseStatus } from "@/lib/expenses/types"
+import type { Expense, ExpenseInsert, ExpenseCategory, ExpenseStatus } from "@/lib/expenses/types"
 
 const CATEGORIES: ExpenseCategory[] = [
   "Food & Dining",
@@ -31,12 +31,16 @@ interface AddExpenseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (data: ExpenseInsert) => Promise<unknown>
+  onUpdate?: (id: string, data: ExpenseInsert) => Promise<unknown>
+  expense?: Expense | null
 }
 
 export function AddExpenseDialog({
   open,
   onOpenChange,
   onSubmit,
+  onUpdate,
+  expense,
 }: AddExpenseDialogProps) {
   const [description, setDescription] = React.useState("")
   const [category, setCategory] = React.useState<ExpenseCategory>("Food & Dining")
@@ -49,6 +53,27 @@ export function AddExpenseDialog({
   const [paymentMethod, setPaymentMethod] = React.useState("Personal Card")
   const [saving, setSaving] = React.useState(false)
 
+  const isEdit = !!expense && !!onUpdate
+  React.useEffect(() => {
+    if (expense) {
+      setDescription(expense.description)
+      setCategory(expense.category)
+      setAmount(String(expense.amount))
+      setExpenseDate(expense.expense_date)
+      setMerchant(expense.merchant)
+      setStatus(expense.status)
+      setPaymentMethod(expense.payment_method ?? "Personal Card")
+    } else {
+      setDescription("")
+      setCategory("Food & Dining")
+      setAmount("")
+      setExpenseDate(new Date().toISOString().slice(0, 10))
+      setMerchant("")
+      setStatus("Completed")
+      setPaymentMethod("Personal Card")
+    }
+  }, [expense, open])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const amt = parseFloat(amount)
@@ -56,21 +81,22 @@ export function AddExpenseDialog({
       return
     }
     setSaving(true)
+    const data = {
+      description: description.trim(),
+      category,
+      amount: amt,
+      expense_date: expenseDate,
+      merchant: merchant.trim(),
+      status,
+      payment_method: paymentMethod,
+    }
     try {
-      await onSubmit({
-        description: description.trim(),
-        category,
-        amount: amt,
-        expense_date: expenseDate,
-        merchant: merchant.trim(),
-        status,
-        payment_method: paymentMethod,
-      })
+      if (isEdit && expense) {
+        await onUpdate(expense.id, data)
+      } else {
+        await onSubmit(data)
+      }
       onOpenChange(false)
-      setDescription("")
-      setAmount("")
-      setMerchant("")
-      setExpenseDate(new Date().toISOString().slice(0, 10))
     } catch {
       // Error handling in parent
     } finally {
@@ -82,7 +108,7 @@ export function AddExpenseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[#0c0a14] border-white/10 text-white sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">Add Expense</DialogTitle>
+          <DialogTitle className="text-white">{isEdit ? "Edit Expense" : "Add Expense"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -178,7 +204,7 @@ export function AddExpenseDialog({
               Cancel
             </ModernButton>
             <ModernButton type="submit" variant="primary" disabled={saving}>
-              {saving ? "Saving..." : "Add Expense"}
+              {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Expense"}
             </ModernButton>
           </DialogFooter>
         </form>
