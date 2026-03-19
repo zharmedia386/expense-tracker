@@ -1,15 +1,21 @@
 "use client"
 
 import { ModernButton } from "./modern-button"
-import { FileSpreadsheet, FileText, Image, MessageSquare, Mic } from "lucide-react"
+import Image from "next/image"
 import { motion } from "framer-motion"
 
 const supportedFormats = [
-  { icon: FileSpreadsheet, label: "Excel" },
-  { icon: FileText, label: "Docs" },
-  { icon: Image, label: "Images" },
-  { icon: MessageSquare, label: "Text" },
-  { icon: Mic, label: "Voice" },
+  { label: "Excel", asset: "/assets/icon-excel.png" },
+  { label: "Docs", asset: "/assets/icon-docs.png" },
+  { label: "Images", asset: "/assets/icon-images.png" },
+  { label: "Text", asset: "/assets/icon-text.png" },
+  { label: "Voice", asset: "/assets/icon-voice.png" },
+]
+
+const trustBadges = [
+  { label: "SOC 2", asset: "/assets/badge-soc2.png" },
+  { label: "GDPR", asset: "/assets/badge-gdpr.png" },
+  { label: "256-bit SSL", asset: "/assets/badge-ssl.png" },
 ]
 
 export function Hero() {
@@ -59,8 +65,9 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="font-[family-name:var(--font-instrument-serif)] text-white text-4xl sm:text-5xl lg:text-[80px] xl:text-[96px] leading-[1.1] text-balance"
         >
-          Track every expense{" "}
-          <em className="italic bg-gradient-to-r from-[#9055ff] to-[#c084fc] bg-clip-text text-transparent">with AI</em>
+          Smart expense tracking,
+          <br />
+          <em className="italic bg-gradient-to-r from-[#9055ff] to-[#c084fc] bg-clip-text text-transparent">powered by AI</em>
         </motion.h1>
 
         {/* Subtext */}
@@ -84,7 +91,7 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.36 + index * 0.06 }}
               className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
             >
-              <format.icon className="w-4 h-4 text-[#9055ff]" />
+              <Image src={format.asset} alt={format.label} width={16} height={16} className="w-4 h-4 object-contain brightness-0 invert" />
               <span className="font-[family-name:var(--font-cabin)] text-white/70 text-xs sm:text-sm">
                 {format.label}
               </span>
@@ -118,15 +125,16 @@ export function Hero() {
             Trusted by 50,000+ professionals worldwide
           </p>
           <div className="flex items-center gap-3 sm:gap-4">
-            {["SOC 2", "GDPR", "256-bit SSL"].map((badge, index) => (
+            {trustBadges.map((badge, index) => (
               <motion.div
-                key={badge}
+                key={badge.label}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
-                className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 font-[family-name:var(--font-cabin)] text-white/50 text-xs backdrop-blur-sm"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
               >
-                {badge}
+                <Image src={badge.asset} alt={badge.label} width={20} height={20} className="w-5 h-5 object-contain brightness-0 invert" />
+                <span className="font-[family-name:var(--font-cabin)] text-white/50 text-xs">{badge.label}</span>
               </motion.div>
             ))}
           </div>

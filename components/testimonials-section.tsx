@@ -1,6 +1,7 @@
 "use client"
 
-import { Star, Quote } from "lucide-react"
+import Image from "next/image"
+import { Heart, Star, Quote } from "lucide-react"
 
 const testimonials = [
   {
@@ -8,7 +9,7 @@ const testimonials = [
     author: "Sarah Jenkins",
     role: "Freelance Designer",
     company: "Creative Agency",
-    avatar: "SJ",
+    avatar: "/assets/avatar-sarah.png",
     rating: 5,
   },
   {
@@ -16,7 +17,7 @@ const testimonials = [
     author: "Michael Chen",
     role: "Sales Director",
     company: "TechFlow Inc.",
-    avatar: "MC",
+    avatar: "/assets/avatar-michael.png",
     rating: 5,
   },
   {
@@ -24,7 +25,7 @@ const testimonials = [
     author: "Emma Watson",
     role: "Account Manager",
     company: "Marketing Co.",
-    avatar: "EW",
+    avatar: "/assets/avatar-emma.png",
     rating: 5,
   },
   {
@@ -32,7 +33,7 @@ const testimonials = [
     author: "David Park",
     role: "CFO",
     company: "StartupXYZ",
-    avatar: "DP",
+    avatar: "/assets/avatar-david.png",
     rating: 5,
   },
   {
@@ -40,7 +41,7 @@ const testimonials = [
     author: "Anna Kowalski",
     role: "Operations Lead",
     company: "EuroTech GmbH",
-    avatar: "AK",
+    avatar: "/assets/avatar-anna.png",
     rating: 5,
   },
   {
@@ -48,7 +49,7 @@ const testimonials = [
     author: "James Liu",
     role: "Product Manager",
     company: "Innovation Labs",
-    avatar: "JL",
+    avatar: "/assets/avatar-james.png",
     rating: 5,
   },
 ]
@@ -72,6 +73,10 @@ export function TestimonialsSection() {
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#7b39fc]/20 to-[#9055ff]/10 border border-[#7b39fc]/30 mb-6 shadow-[0_0_30px_rgba(123,57,252,0.15)]">
+            <Heart className="w-4 h-4 text-[#9055ff]" />
+            <span className="font-[family-name:var(--font-cabin)] text-sm text-[#9055ff]">Testimonials</span>
+          </div>
           <h2 className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-6xl mb-4 sm:mb-6">
             Loved by{" "}
             <em className="italic relative inline-block">
@@ -120,10 +125,8 @@ export function TestimonialsSection() {
               
               {/* Author */}
               <div className="relative flex items-center gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#7b39fc] to-[#4a2090] flex items-center justify-center shadow-lg shadow-[#7b39fc]/20">
-                  <span className="font-[family-name:var(--font-cabin)] text-white text-xs sm:text-sm font-medium">
-                    {testimonial.avatar}
-                  </span>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 shadow-lg shadow-[#7b39fc]/20">
+                  <Image src={testimonial.avatar} alt={testimonial.author} width={40} height={40} className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="font-[family-name:var(--font-manrope)] text-white font-semibold text-sm">

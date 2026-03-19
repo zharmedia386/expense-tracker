@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { AuthLayout } from "@/components/auth-layout"
-import { Button } from "@/components/ui/button"
+import { ModernButton } from "@/components/modern-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Chrome, Github } from "lucide-react"
@@ -62,12 +62,14 @@ export default function LoginPage() {
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/20 h-11 focus-visible:ring-[#7b39fc]"
               />
             </div>
-            <Button 
-              className="bg-[#7b39fc] hover:bg-[#6a2ee0] text-white h-11 mt-2 rounded-xl transition-all active:scale-[0.98]" 
+            <ModernButton 
+              variant="primary" 
+              size="md"
+              className="w-full h-11 mt-2" 
               disabled={isLoading}
             >
               {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
+            </ModernButton>
           </div>
         </form>
         
@@ -81,22 +83,24 @@ export default function LoginPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Button 
-            variant="outline" 
-            className="bg-white/5 border-white/10 text-white hover:bg-white/10 h-11 rounded-xl transition-all active:scale-[0.98]"
+          <ModernButton 
+            variant="secondary" 
+            size="md"
+            className="h-11" 
             disabled={isLoading}
           >
             <Chrome className="mr-2 h-4 w-4" />
             Google
-          </Button>
-          <Button 
-            variant="outline" 
-            className="bg-white/5 border-white/10 text-white hover:bg-white/10 h-11 rounded-xl transition-all active:scale-[0.98]"
+          </ModernButton>
+          <ModernButton 
+            variant="secondary" 
+            size="md"
+            className="h-11" 
             disabled={isLoading}
           >
             <Github className="mr-2 h-4 w-4" />
             GitHub
-          </Button>
+          </ModernButton>
         </div>
       </div>
       

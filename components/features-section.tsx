@@ -1,36 +1,25 @@
 "use client"
 
-import { Zap, Shield, BarChart3, Clock, Rocket, Globe } from "lucide-react"
+import { Zap } from "lucide-react"
+import Image from "next/image"
 
 const features = [
-  {
-    icon: Zap,
-    title: "Instant Processing",
-    description: "Scan receipts and invoices with high precision OCR that categorizes transparency in seconds.",
+  { title: "Instant Processing", asset: "/assets/feature-instant.png",
+    description: "Scan receipts and invoices with high precision OCR that categorizes transactions in seconds.",
   },
-  {
-    icon: Shield,
-    title: "Bank-Grade Security",
+  { title: "Bank-Grade Security", asset: "/assets/feature-security.png",
     description: "Your data is encrypted using AES-256 and never sold to third parties. Privacy is our priority.",
   },
-  {
-    icon: BarChart3,
-    title: "Smart Insights",
+  { title: "Smart Insights", asset: "/assets/feature-insights.png",
     description: "AI-driven analytics that identify spending patterns and suggest practical ways to save money.",
   },
-  {
-    icon: Clock,
-    title: "Subscription Tracking",
+  { title: "Subscription Tracking", asset: "/assets/feature-subscription.png",
     description: "Identify and manage recurring payments. Get notified before trials end or prices increase.",
   },
-  {
-    icon: Rocket,
-    title: "Future Projections",
+  { title: "Future Projections", asset: "/assets/feature-projections.png",
     description: "ML models that predict your future cash flow based on historical data and planned goals.",
   },
-  {
-    icon: Globe,
-    title: "Multi-Currency Support",
+  { title: "Multi-Currency Support", asset: "/assets/feature-currency.png",
     description: "Track expenses globally with real-time exchange rates and localized tax calculations.",
   },
 ]
@@ -44,6 +33,10 @@ export function FeaturesSection() {
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#7b39fc]/20 to-[#9055ff]/10 border border-[#7b39fc]/30 mb-6 shadow-[0_0_30px_rgba(123,57,252,0.15)]">
+            <Zap className="w-4 h-4 text-[#9055ff]" />
+            <span className="font-[family-name:var(--font-cabin)] text-sm text-[#9055ff]">Features</span>
+          </div>
           <h2 className="font-[family-name:var(--font-instrument-serif)] text-white text-3xl sm:text-4xl lg:text-6xl mb-4 sm:mb-6">
             Everything you need for <br />
             <em className="italic bg-gradient-to-r from-[#9055ff] via-[#c084fc] to-[#9055ff] bg-clip-text text-transparent">
@@ -61,8 +54,8 @@ export function FeaturesSection() {
               key={feature.title}
               className="group p-6 sm:p-8 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-[#7b39fc]/40 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#7b39fc] to-[#4a2090] flex items-center justify-center mb-6 sm:mb-8 shadow-lg shadow-[#7b39fc]/20 group-hover:shadow-[#7b39fc]/40 transition-shadow">
-                <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#7b39fc] to-[#4a2090] flex items-center justify-center mb-6 sm:mb-8 shadow-lg shadow-[#7b39fc]/20 group-hover:shadow-[#7b39fc]/40 transition-shadow overflow-hidden">
+                <Image src={feature.asset} alt={feature.title} width={48} height={48} className="w-5 h-5 sm:w-6 sm:h-6 object-contain brightness-0 invert" />
               </div>
               <h3 className="font-[family-name:var(--font-manrope)] text-white text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
                 {feature.title}

@@ -14,7 +14,7 @@ import {
   ArrowUpRight,
   Plus
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ModernButton } from "@/components/modern-button"
 
 const stats = [
   {
@@ -67,13 +67,13 @@ export default function DashboardPage() {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl h-12 px-6">
+          <ModernButton variant="secondary" size="md" className="h-12 px-6">
             Generate Report
-          </Button>
-          <Button className="bg-[#7b39fc] hover:bg-[#6a2ee0] text-white rounded-xl h-12 px-6 shadow-[0_0_20px_rgba(123,57,252,0.3)] group">
+          </ModernButton>
+          <ModernButton variant="primary" size="md" className="h-12 px-6">
             <Plus className="w-4 h-4 mr-2" />
             Add Expense
-          </Button>
+          </ModernButton>
         </motion.div>
       </div>
 
@@ -84,15 +84,13 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Main Charts & Insights Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        <div className="lg:col-span-3">
-          <ExpenseCharts />
-        </div>
-        <div className="lg:col-span-1">
-          <AIInsights />
-        </div>
+      {/* Main Charts Section */}
+      <div className="w-full">
+        <ExpenseCharts />
       </div>
+
+      {/* AI Insights Section - New Row */}
+      <AIInsights />
 
       {/* Recent Activity Table (Simplified for now) */}
       <motion.div
@@ -106,9 +104,9 @@ export default function DashboardPage() {
             <h3 className="text-xl font-bold text-white">Recent Transactions</h3>
             <p className="text-white/40 text-sm">Latest updates across all categories</p>
           </div>
-          <Button variant="ghost" className="text-[#9055ff] hover:text-[#c084fc] hover:bg-[#7b39fc]/10">
+          <ModernButton variant="ghost" size="sm" className="text-[#9055ff] hover:text-[#c084fc] hover:bg-[#7b39fc]/10">
             View All Transactions
-          </Button>
+          </ModernButton>
         </div>
 
         <div className="overflow-x-auto">
@@ -144,9 +142,9 @@ export default function DashboardPage() {
                     {row.amt}
                   </td>
                   <td className="py-5 text-right">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-white/10">
+                    <ModernButton variant="ghost" size="sm" className="h-8 w-8 p-0 min-w-0 rounded-full hover:bg-white/10">
                       <ArrowUpRight className="w-4 h-4 text-white/30" />
-                    </Button>
+                    </ModernButton>
                   </td>
                 </tr>
               ))}

@@ -9,9 +9,13 @@ __v0_jsx-dev-runtime.ts
 next.user-config.*
 
 # Environment variables
+.env
 .env*.local
 
 # Common ignores
+firebase-debug.log
+firebase-debug.*.log
+
 node_modules/
 .next/
 .DS_Store
