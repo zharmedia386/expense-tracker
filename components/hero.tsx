@@ -42,7 +42,7 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0 }}
-          className="flex items-center gap-2 h-[38px] px-3 rounded-full bg-[rgba(85,80,110,0.4)] backdrop-blur-md border border-[rgba(164,132,215,0.5)] shadow-[0_0_30px_rgba(123,57,252,0.3)]"
+          className="flex items-center gap-2 h-[38px] pl-1.5 pr-3 rounded-full bg-[rgba(85,80,110,0.4)] backdrop-blur-md border border-[rgba(164,132,215,0.5)] shadow-[0_0_30px_rgba(123,57,252,0.3)]"
         >
           <span className="px-2 py-1 bg-gradient-to-r from-[#9055ff] to-[#7b39fc] rounded-full font-[family-name:var(--font-cabin)] font-medium text-xs sm:text-sm text-white shadow-lg">
             New
