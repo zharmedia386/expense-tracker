@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const OUT_DIR = path.join(__dirname, "..", "public", "generated")
-const MODEL = "gemini-2.0-flash-preview-image-generation"
+const MODEL = "gemini-3.1-flash-image-preview"
 
 // Ensure output directory exists
 fs.mkdirSync(OUT_DIR, { recursive: true })
@@ -25,33 +25,47 @@ if (!apiKey) {
 
 const ai = new GoogleGenAI({ apiKey })
 
-async function generateImage(prompt, filename) {
+async function generateImage(prompt, filename, retries = 3) {
   console.log(`Generating: ${filename}...`)
+  for (let attempt = 1; attempt <= retries; attempt++) {
   try {
     const response = await ai.models.generateContent({
       model: MODEL,
       contents: prompt,
-      config: {
-        responseModalities: ["IMAGE", "TEXT"],
-        responseMimeType: "image/png",
-      },
     })
 
-    const part = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData)
-    if (!part?.inlineData?.data) {
+    const part = response.candidates?.[0]?.content?.parts?.find(
+      (p) => p.inlineData || p.inline_data
+    )
+    const data = part?.inlineData || part?.inline_data
+    if (!data?.data && !data?.imageBytes) {
       console.error(`  No image in response for ${filename}. Try a different model or prompt.`)
       return false
     }
 
-    const buffer = Buffer.from(part.inlineData.data, "base64")
+    const buffer = Buffer.from(data.data || data.imageBytes, "base64")
     const outPath = path.join(OUT_DIR, filename)
     fs.writeFileSync(outPath, buffer)
     console.log(`  Saved: ${filename}`)
     return true
   } catch (err) {
-    console.error(`  Error: ${err.message}`)
-    return false
+    const msg = typeof err === "string" ? err : err?.message || JSON.stringify(err)
+    const is429 = msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota")
+    const retryDelay = is429 ? 65000 : 2000
+    if (attempt < retries && is429) {
+      console.log(`  Quota exceeded. Waiting ${retryDelay / 1000}s before retry (${attempt}/${retries})...`)
+      await delay(retryDelay)
+    } else {
+      console.error(`  Error: ${msg.slice(0, 200)}`)
+      return false
+    }
   }
+  }
+  return false
+}
+
+function delay(ms) {
+  return new Promise((r) => setTimeout(r, ms))
 }
 
 async function main() {
@@ -62,6 +76,7 @@ async function main() {
     "A minimalist modern logo for an AI expense tracking app called ExpenseAI. Purple gradient (#9055ff to #6B2FD6), geometric abstract shape suggesting a chart or receipt, clean vector style, white/transparent background, square format. Professional fintech aesthetic.",
     "logo.png"
   )
+  await delay(1500)
 
   // 2. Format icons (Excel, Docs, Images, Text, Voice)
   const formatPrompts = [
@@ -73,6 +88,7 @@ async function main() {
   ]
   for (const [prompt, filename] of formatPrompts) {
     await generateImage(prompt, filename)
+    await delay(1500)
   }
 
   // 3. Trust badge logos
@@ -83,6 +99,7 @@ async function main() {
   ]
   for (const [prompt, filename] of trustPrompts) {
     await generateImage(prompt, filename)
+    await delay(1500)
   }
 
   // 4. Feature icons
@@ -96,6 +113,7 @@ async function main() {
   ]
   for (const [prompt, filename] of featurePrompts) {
     await generateImage(prompt, filename)
+    await delay(1500)
   }
 
   // 5. Testimonial avatars (realistic professional headshots)
@@ -109,6 +127,7 @@ async function main() {
   ]
   for (const [prompt, filename] of avatarPrompts) {
     await generateImage(prompt, filename)
+    await delay(1500)
   }
 
   console.log("\nDone! Assets saved to public/generated/")

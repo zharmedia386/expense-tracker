@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "generate:assets": "node --env-file=.env scripts/generate-assets.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.46.0",

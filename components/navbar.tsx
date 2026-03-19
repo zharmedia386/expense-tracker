@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { ChevronDown, Menu, X } from "lucide-react"
 import { ModernButton } from "./modern-button"
+import { GeneratedAsset } from "./generated-asset"
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -35,15 +36,24 @@ export function Navbar() {
         <div className="relative flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center gap-2">
-            <svg width="32" height="32" viewBox="0 0 159 153" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M102.414 87.9698L80.0697 153L56.9484 87.9698H0.790039L79.2906 0L159.21 87.9698H102.414Z" fill="url(#navGrad)"/>
-              <defs>
-                <linearGradient id="navGrad" x1="80" y1="0" x2="80" y2="153" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#9055FF"/>
-                  <stop offset="1" stopColor="#6B2FD6"/>
-                </linearGradient>
-              </defs>
-            </svg>
+            <GeneratedAsset
+              src="/generated/logo.png"
+              alt="ExpenseAI"
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
+              fallback={
+                <svg width="32" height="32" viewBox="0 0 159 153" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M102.414 87.9698L80.0697 153L56.9484 87.9698H0.790039L79.2906 0L159.21 87.9698H102.414Z" fill="url(#navGrad)"/>
+                  <defs>
+                    <linearGradient id="navGrad" x1="80" y1="0" x2="80" y2="153" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#9055FF"/>
+                      <stop offset="1" stopColor="#6B2FD6"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              }
+            />
             <span className="font-[family-name:var(--font-manrope)] text-white text-lg font-bold hidden sm:block">
               ExpenseAI
             </span>
