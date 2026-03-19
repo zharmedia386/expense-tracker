@@ -66,7 +66,7 @@ function PieChartIcon(props: any) {
 }
 
 export default function ChatBotPage() {
-  const supabase = createClient()
+  const supabase = createClient() // For auth check only
   const [sessions, setSessions] = React.useState<ChatSession[]>([])
   const [currentSessionId, setCurrentSessionId] = React.useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true)
@@ -87,20 +87,15 @@ export default function ChatBotPage() {
     scrollToBottom()
   }, [messages, isTyping])
 
-  // Fetch initial sessions
+  // Fetch initial sessions via API
   React.useEffect(() => {
     async function loadSessions() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      const res = await fetch("/api/chat/sessions")
+      if (!res.ok) {
         setInitialLoading(false)
         return
       }
-
-      const { data } = await supabase
-        .from("chat_sessions")
-        .select("*")
-        .order("created_at", { ascending: false })
-      
+      const data = await res.json()
       if (data && data.length > 0) {
         setSessions(data)
         setCurrentSessionId(data[0].id)
@@ -127,18 +122,15 @@ export default function ChatBotPage() {
         return
       }
 
-      const { data } = await supabase
-        .from("chat_messages")
-        .select("*")
-        .eq("session_id", currentSessionId)
-        .order("created_at", { ascending: true })
-      
+      const res = await fetch(`/api/chat/sessions/${currentSessionId}/messages`)
+      if (!res.ok) return
+      const data = await res.json()
       if (data) {
-        setMessages(data.map((m: any) => ({
+        setMessages(data.map((m: { id: string; role: string; content: string; created_at: string }) => ({
           id: m.id,
           role: m.role,
           content: m.content,
-          timestamp: new Date(m.created_at)
+          timestamp: new Date(m.created_at),
         })))
       }
     }
@@ -155,25 +147,24 @@ export default function ChatBotPage() {
     }
 
     let sessionId = currentSessionId
-    
-    // Create new session if none exists
+
+    // Create new session via API if none exists
     if (!sessionId) {
-      const { data: newSession, error: sError } = await supabase
-        .from("chat_sessions")
-        .insert({
-          user_id: user.id,
-          title: text.length > 30 ? text.substring(0, 30) + "..." : text
-        })
-        .select()
-        .single()
-      
-      if (sError) {
-        console.error("Session Error:", sError)
-        toast.error("Failed to start conversation. Please ensure chat tables exist.")
+      const title = text.length > 30 ? text.substring(0, 30) + "..." : text
+      const sRes = await fetch("/api/chat/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      })
+      if (!sRes.ok) {
+        const err = await sRes.json().catch(() => ({}))
+        toast.error(err.error || "Failed to start conversation")
+        setIsTyping(false)
         return
       }
+      const newSession = await sRes.json()
       sessionId = newSession.id
-      setSessions([newSession, ...sessions])
+      setSessions((prev) => [{ ...newSession, id: newSession.id, title: newSession.title, created_at: newSession.created_at }, ...prev])
       setCurrentSessionId(sessionId)
     }
 
@@ -190,11 +181,11 @@ export default function ChatBotPage() {
     setInput("")
     setIsTyping(true)
 
-    // Save user message to Supabase
-    await supabase.from("chat_messages").insert({
-      session_id: sessionId,
-      role: "user",
-      content: text
+    // Save user message via API
+    await fetch(`/api/chat/sessions/${sessionId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: "user", content: text }),
     })
 
     try {
@@ -211,30 +202,35 @@ export default function ChatBotPage() {
       const data = await response.json()
       if (data.error) throw new Error(data.error)
 
-      const assistantContent = data.choices[0].message.content
+      const assistantContent = data.choices?.[0]?.message?.content ?? ""
 
-      // Save assistant message to Supabase
-      const { data: savedAssistantMsg, error: mError } = await supabase
-        .from("chat_messages")
-        .insert({
-          session_id: sessionId,
-          role: "assistant",
-          content: assistantContent
-        })
-        .select()
-        .single()
-
-      if (mError) throw mError
+      // Save assistant message via API (API accepts empty content for assistant)
+      const mRes = await fetch(`/api/chat/sessions/${sessionId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: "assistant", content: assistantContent || "(No response)" }),
+      })
+      const savedAssistantMsg = mRes.ok ? await mRes.json() : null
 
       if (savedAssistantMsg) {
         setMessages((prev) => [
-          ...prev, 
+          ...prev,
           {
             id: savedAssistantMsg.id,
             role: "assistant",
             content: assistantContent,
             timestamp: new Date(savedAssistantMsg.created_at),
-          }
+          },
+        ])
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `temp-${Date.now()}`,
+            role: "assistant",
+            content: assistantContent,
+            timestamp: new Date(),
+          },
         ])
       }
     } catch (error) {
@@ -260,13 +256,13 @@ export default function ChatBotPage() {
 
   const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    const { error } = await supabase.from("chat_sessions").delete().eq("id", id)
-    if (error) {
+    const res = await fetch(`/api/chat/sessions/${id}`, { method: "DELETE" })
+    if (!res.ok) {
       toast.error("Failed to delete conversation")
       return
     }
 
-    const newSessions = sessions.filter(s => s.id !== id)
+    const newSessions = sessions.filter((s) => s.id !== id)
     setSessions(newSessions)
     if (currentSessionId === id) {
       setCurrentSessionId(newSessions.length > 0 ? newSessions[0].id : null)
@@ -286,17 +282,18 @@ export default function ChatBotPage() {
       return
     }
 
-    const { error } = await supabase
-      .from("chat_sessions")
-      .update({ title: editTitle })
-      .eq("id", id)
-    
-    if (error) {
+    const res = await fetch(`/api/chat/sessions/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: editTitle }),
+    })
+
+    if (!res.ok) {
       toast.error("Failed to rename conversation")
       return
     }
 
-    setSessions(sessions.map(s => s.id === id ? { ...s, title: editTitle } : s))
+    setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, title: editTitle } : s)))
     setEditingSessionId(null)
   }
 

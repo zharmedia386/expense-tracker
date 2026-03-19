@@ -70,18 +70,28 @@ export async function POST(req: Request) {
 
     const userContext = await buildUserContext(supabase, user.id)
 
-    const systemPrompt = `You are a helpful AI financial assistant for ExpenseAI. You assist users with expense tracking, summaries, and financial advice.
+    const systemPrompt = `You are a helpful AI financial assistant for ExpenseAI. You assist users with expense tracking, summaries, savings tips, investment basics, and general financial advice.
 
 ${userContext}
 
-Guidelines:
-- Always format your response using Markdown: use **bold** for amounts and key terms, - for bullet lists, 1. 2. 3. for numbered lists, and proper line breaks.
-- Use the user's actual expense data above when answering questions about their spending, categories, or totals.
-- All currency is Indonesian Rupiah (IDR). Format amounts as **Rp X.XXX** (bold) e.g. **Rp 50.000**.
-- Be concise and actionable. For "summarize spending" use their real totals and categories.
-- For "top categories" or "how much did I spend on X" - query the data provided and present as a formatted list.
-- If asked to add an expense, explain they can use the "Add Expense" button in the dashboard; you cannot create expenses directly.
-- Never make up numbers - use only the data provided. If data is empty, say so.`
+CRITICAL: You must ALWAYS return a helpful response. Never return empty content.
+
+When the user asks about THEIR data (spending, categories, totals):
+- Use the expense data above. Use only real numbers from the data.
+- Format as Markdown: **bold** for amounts, - for bullets, 1. 2. 3. for lists.
+- Currency is Indonesian Rupiah (IDR). Use **Rp X.XXX** format.
+
+When the user asks GENERAL questions (savings tips, investment, budgeting, how to save money):
+- Give practical, actionable advice in Indonesian Rupiah context.
+- Use Markdown formatting. Be helpful and concise.
+- You can combine their expense data with general advice when relevant (e.g. "Based on your spending, try X. Generally, saving 20% is recommended...").
+
+Examples you MUST answer fully:
+- "How can I save money?" → Give 4-6 practical tips.
+- "What is investment?" → Explain briefly, mention options relevant to Indonesia (reksadana, deposito, saham).
+- "Budgeting tips?" → Provide actionable steps.
+
+If asked to add an expense: direct them to the "Add Expense" button. Never make up expense numbers.`
 
     const withoutSystem = messages.filter((m) => m.role !== "system")
     const enrichedMessages = [
@@ -113,6 +123,21 @@ Guidelines:
     }
 
     const data = await response.json()
+
+    const FALLBACK_MESSAGE =
+      "I don't have enough context for that. I'm a **financial tracker assistant**—I help with expense summaries, spending analysis, savings tips, and budgeting based on your data.\n\nTry asking things like:\n- \"Summarize my spending this month\"\n- \"How can I save more?\"\n- \"What are my top expense categories?\""
+
+    // Fallback: if AI returns empty, null, or missing content
+    const content = data?.choices?.[0]?.message?.content
+    const isEmpty = content == null || (typeof content === "string" && content.trim() === "")
+
+    if (isEmpty) {
+      if (!data.choices) data.choices = [{}]
+      if (!data.choices[0]) data.choices[0] = { message: {} }
+      if (!data.choices[0].message) data.choices[0].message = {}
+      data.choices[0].message.content = FALLBACK_MESSAGE
+    }
+
     return NextResponse.json(data)
   } catch (error) {
     console.error("Chat Proxy Error:", error)
