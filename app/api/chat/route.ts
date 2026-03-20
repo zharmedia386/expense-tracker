@@ -111,7 +111,7 @@ If asked to add an expense: direct them to the "Add Expense" button. Never make 
       body: JSON.stringify({
         model: "gpt-5.1",
         messages: enrichedMessages,
-        max_tokens: 800,
+        max_tokens: 2500,
         temperature: 0.7,
       }),
     })

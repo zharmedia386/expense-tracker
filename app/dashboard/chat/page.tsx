@@ -150,7 +150,12 @@ export default function ChatBotPage() {
     loadMessages()
   }, [currentSessionId])
 
-  const handleSendMessage = async (text: string) => {
+  const messagesRef = React.useRef(messages)
+  React.useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+
+  const handleSendMessage = async (text: string, forceNewSession: boolean = false) => {
     if (!text.trim()) return
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -159,7 +164,7 @@ export default function ChatBotPage() {
       return
     }
 
-    let sessionId = currentSessionId
+    let sessionId = forceNewSession ? null : currentSessionId
 
     // Create new session via API if none exists
     if (!sessionId) {
@@ -202,11 +207,16 @@ export default function ChatBotPage() {
     })
 
     try {
+      // Use messagesRef to avoid stale state if handleSendMessage is called via timeout
+      const msgsToSend = forceNewSession 
+        ? [{ role: "user", content: text }]
+        : messagesRef.current.filter(m => m.id !== "welcome").map(m => ({ role: m.role, content: m.content })).concat([{ role: "user", content: text }]);
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: messages.filter(m => m.id !== "welcome").map(m => ({ role: m.role, content: m.content })).concat([{ role: "user", content: text }])
+          messages: msgsToSend
         }),
       })
 
@@ -327,7 +337,15 @@ export default function ChatBotPage() {
     const initialPrompt = searchParams.get("prompt")
     if (initialPrompt && !initialPromptProcessed.current && !initialLoading) {
       initialPromptProcessed.current = true
-      handleSendMessage(initialPrompt)
+      
+      // Clear current state to ensure a completely new chat
+      setCurrentSessionId(null)
+      setMessages([])
+      
+      // Use setTimeout to ensure the clean state is flushed before sending the message
+      setTimeout(() => {
+        handleSendMessage(initialPrompt, true)
+      }, 0)
     }
   }, [searchParams, initialLoading])
 
