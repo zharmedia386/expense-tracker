@@ -87,36 +87,36 @@ const statusColors: Record<ExpenseStatus, string> = {
   "Refunded": "bg-slate-500/20 text-slate-400 border-slate-500/30",
 }
 
-// 24 sample expenses (4 pages x 6 items)
+// 24 sample expenses (4 pages x 6 items) - amounts in IDR (15,000 - 80,000)
 const sampleExpenses: Expense[] = [
   // Page 1
-  { id: "1", description: "Team lunch meeting", category: "Food & Dining", amount: 156.80, date: "2024-03-15", merchant: "The Capital Grille", status: "Completed", paymentMethod: "Corporate Card" },
-  { id: "2", description: "Uber to airport", category: "Transportation", amount: 45.00, date: "2024-03-14", merchant: "Uber", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "3", description: "Office supplies", category: "Shopping", amount: 89.99, date: "2024-03-14", merchant: "Staples", status: "Completed", paymentMethod: "Corporate Card" },
-  { id: "4", description: "Monthly rent", category: "Housing", amount: 2500.00, date: "2024-03-01", merchant: "Property Management", status: "Completed", paymentMethod: "Bank Transfer" },
-  { id: "5", description: "Netflix subscription", category: "Entertainment", amount: 15.99, date: "2024-03-10", merchant: "Netflix", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "6", description: "Flight to NYC", category: "Travel", amount: 389.00, date: "2024-03-08", merchant: "Delta Airlines", status: "Pending", paymentMethod: "Corporate Card" },
+  { id: "1", description: "Team lunch meeting", category: "Food & Dining", amount: 45000, date: "2024-03-15", merchant: "Warung Padang", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "2", description: "Gojek to office", category: "Transportation", amount: 25000, date: "2024-03-14", merchant: "Gojek", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "3", description: "Office supplies", category: "Shopping", amount: 35000, date: "2024-03-14", merchant: "Gramedia", status: "Completed", paymentMethod: "Corporate Card" },
+  { id: "4", description: "Electricity bill", category: "Housing", amount: 75000, date: "2024-03-01", merchant: "PLN", status: "Completed", paymentMethod: "Bank Transfer" },
+  { id: "5", description: "Netflix subscription", category: "Entertainment", amount: 54000, date: "2024-03-10", merchant: "Netflix", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "6", description: "Train ticket", category: "Travel", amount: 65000, date: "2024-03-08", merchant: "Tiket.com", status: "Pending", paymentMethod: "Personal Card" },
   // Page 2
-  { id: "7", description: "Client dinner", category: "Business", amount: 278.50, date: "2024-03-12", merchant: "Nobu", status: "Completed", paymentMethod: "Corporate Card" },
-  { id: "8", description: "Pharmacy", category: "Healthcare", amount: 34.50, date: "2024-03-11", merchant: "CVS Pharmacy", status: "Completed", paymentMethod: "HSA Card" },
-  { id: "9", description: "Electric bill", category: "Utilities", amount: 142.30, date: "2024-03-05", merchant: "ConEdison", status: "Completed", paymentMethod: "Bank Transfer" },
-  { id: "10", description: "Grocery shopping", category: "Food & Dining", amount: 203.45, date: "2024-03-13", merchant: "Whole Foods", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "11", description: "Gas refill", category: "Transportation", amount: 58.00, date: "2024-03-09", merchant: "Shell", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "12", description: "Conference ticket", category: "Business", amount: 599.00, date: "2024-03-07", merchant: "TechConf 2024", status: "Refunded", paymentMethod: "Corporate Card" },
+  { id: "7", description: "Client dinner", category: "Business", amount: 78000, date: "2024-03-12", merchant: "Resto Kemang", status: "Completed", paymentMethod: "Corporate Card" },
+  { id: "8", description: "Pharmacy", category: "Healthcare", amount: 28000, date: "2024-03-11", merchant: "Guardian", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "9", description: "Water bill", category: "Utilities", amount: 42000, date: "2024-03-05", merchant: "PAM", status: "Completed", paymentMethod: "Bank Transfer" },
+  { id: "10", description: "Grocery shopping", category: "Food & Dining", amount: 52000, date: "2024-03-13", merchant: "Indomaret", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "11", description: "Gas refill", category: "Transportation", amount: 35000, date: "2024-03-09", merchant: "Pertamina", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "12", description: "Online course", category: "Business", amount: 55000, date: "2024-03-07", merchant: "Udemy", status: "Refunded", paymentMethod: "Personal Card" },
   // Page 3
-  { id: "13", description: "New laptop bag", category: "Shopping", amount: 129.00, date: "2024-03-06", merchant: "Amazon", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "14", description: "Spotify Premium", category: "Entertainment", amount: 9.99, date: "2024-03-01", merchant: "Spotify", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "15", description: "Hotel in SF", category: "Travel", amount: 456.00, date: "2024-03-04", merchant: "Marriott", status: "Completed", paymentMethod: "Corporate Card" },
-  { id: "16", description: "Dentist visit", category: "Healthcare", amount: 175.00, date: "2024-03-02", merchant: "City Dental", status: "Pending", paymentMethod: "HSA Card" },
-  { id: "17", description: "Internet bill", category: "Utilities", amount: 79.99, date: "2024-03-01", merchant: "Spectrum", status: "Completed", paymentMethod: "Bank Transfer" },
-  { id: "18", description: "Lunch with team", category: "Food & Dining", amount: 87.25, date: "2024-02-28", merchant: "Chipotle", status: "Completed", paymentMethod: "Corporate Card" },
+  { id: "13", description: "Phone case", category: "Shopping", amount: 22000, date: "2024-03-06", merchant: "Tokopedia", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "14", description: "Spotify Premium", category: "Entertainment", amount: 54000, date: "2024-03-01", merchant: "Spotify", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "15", description: "Hotel stay", category: "Travel", amount: 68000, date: "2024-03-04", merchant: "Traveloka", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "16", description: "Doctor visit", category: "Healthcare", amount: 75000, date: "2024-03-02", merchant: "Klinik Sehat", status: "Pending", paymentMethod: "Personal Card" },
+  { id: "17", description: "Internet bill", category: "Utilities", amount: 65000, date: "2024-03-01", merchant: "Indihome", status: "Completed", paymentMethod: "Bank Transfer" },
+  { id: "18", description: "Lunch with team", category: "Food & Dining", amount: 38000, date: "2024-02-28", merchant: "KFC", status: "Completed", paymentMethod: "Corporate Card" },
   // Page 4
-  { id: "19", description: "Parking garage", category: "Transportation", amount: 25.00, date: "2024-02-27", merchant: "Central Parking", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "20", description: "Software license", category: "Business", amount: 299.00, date: "2024-02-26", merchant: "Adobe", status: "Completed", paymentMethod: "Corporate Card" },
-  { id: "21", description: "Gym membership", category: "Healthcare", amount: 49.00, date: "2024-02-25", merchant: "Equinox", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "22", description: "Movie tickets", category: "Entertainment", amount: 32.00, date: "2024-02-24", merchant: "AMC Theaters", status: "Completed", paymentMethod: "Personal Card" },
-  { id: "23", description: "Home repairs", category: "Housing", amount: 350.00, date: "2024-02-23", merchant: "Local Handyman", status: "Pending", paymentMethod: "Personal Card" },
-  { id: "24", description: "Books for work", category: "Shopping", amount: 67.50, date: "2024-02-22", merchant: "Barnes & Noble", status: "Completed", paymentMethod: "Corporate Card" },
+  { id: "19", description: "Parking fee", category: "Transportation", amount: 15000, date: "2024-02-27", merchant: "Parkir Mall", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "20", description: "Cloud storage", category: "Business", amount: 65000, date: "2024-02-26", merchant: "Google One", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "21", description: "Vitamin supplements", category: "Healthcare", amount: 45000, date: "2024-02-25", merchant: "Halodoc", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "22", description: "Movie tickets", category: "Entertainment", amount: 72000, date: "2024-02-24", merchant: "CGV", status: "Completed", paymentMethod: "Personal Card" },
+  { id: "23", description: "Cleaning supplies", category: "Housing", amount: 28000, date: "2024-02-23", merchant: "Ace Hardware", status: "Pending", paymentMethod: "Personal Card" },
+  { id: "24", description: "Books for work", category: "Shopping", amount: 52000, date: "2024-02-22", merchant: "Gramedia", status: "Completed", paymentMethod: "Personal Card" },
 ]
 
 const ITEMS_PER_PAGE = 6
