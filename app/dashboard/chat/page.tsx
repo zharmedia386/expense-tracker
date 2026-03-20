@@ -3,6 +3,7 @@
 import * as React from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { motion, AnimatePresence } from "framer-motion"
+import { useSearchParams } from "next/navigation"
 import { 
   Send, 
   Bot, 
@@ -318,6 +319,17 @@ export default function ChatBotPage() {
     setEditingSessionId(session.id)
     setEditTitle(session.title)
   }
+
+  const searchParams = useSearchParams()
+  const initialPromptProcessed = React.useRef(false)
+
+  React.useEffect(() => {
+    const initialPrompt = searchParams.get("prompt")
+    if (initialPrompt && !initialPromptProcessed.current && !initialLoading) {
+      initialPromptProcessed.current = true
+      handleSendMessage(initialPrompt)
+    }
+  }, [searchParams, initialLoading])
 
   const saveTitle = async (id: string) => {
     const trimmed = editTitle.trim()

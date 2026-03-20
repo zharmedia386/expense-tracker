@@ -38,7 +38,7 @@ export default function DashboardPage() {
     sortBy,
     sortOrder
   })
-  const { data: analytics } = useAnalytics(6)
+  const { data: analytics } = useAnalytics(365)
 
   const recentExpenses = expenses.slice(0, 5)
   const monthlyTotal = analytics?.totals?.net ?? 0

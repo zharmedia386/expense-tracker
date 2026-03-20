@@ -84,6 +84,8 @@ export default function SettingsPage() {
       })
       if (!res.ok) throw new Error("Failed to save")
       toast.success("Profile updated")
+      window.dispatchEvent(new Event("profileUpdated"))
+      router.refresh()
     } catch {
       toast.error("Failed to save profile")
     } finally {
@@ -130,6 +132,7 @@ export default function SettingsPage() {
       const data = await res.json()
       setProfile((p) => ({ ...p, avatar_url: data.avatar_url }))
       toast.success("Avatar updated")
+      window.dispatchEvent(new Event("avatarUpdated"))
       router.refresh()
     } catch {
       toast.error("Failed to upload avatar")

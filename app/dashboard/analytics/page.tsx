@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { motion } from "framer-motion"
 import { 
@@ -60,7 +61,7 @@ const placeholderWeekly = [
 ]
 
 export default function AnalyticsPage() {
-  const [timeframe, setTimeframe] = React.useState("180")
+  const [timeframe, setTimeframe] = React.useState("365")
   const { data, loading, error } = useAnalytics(Number(timeframe))
 
   const monthlyData = data?.monthlyData?.length ? data.monthlyData : placeholderMonthly
@@ -244,7 +245,7 @@ export default function AnalyticsPage() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="lg:col-span-2 p-8 rounded-[32px] bg-gradient-to-br from-[#7b39fc]/20 via-transparent to-transparent border border-[#7b39fc]/30 relative overflow-hidden group"
         >
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="relative z-10">
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-5">
                 <div className="w-12 h-12 rounded-2xl bg-[#7b39fc] flex items-center justify-center shadow-[0_8px_20px_rgba(123,57,252,0.4)] group-hover:scale-110 transition-transform duration-500">
@@ -255,13 +256,9 @@ export default function AnalyticsPage() {
               <p className="text-white/70 leading-relaxed mb-8 text-base">
                 Based on your last 3 months, you could save up to <span className="text-[#9055ff] font-bold">{formatIDR(420000)}/month</span> by optimizing your "Entertainment" subscriptions and switching to a weekly grocery plan.
               </p>
-              <button className="flex items-center gap-2 text-white font-bold group-hover:gap-4 transition-all cursor-pointer">
-                View AI Optimization Plan
-                <ArrowRight className="w-5 h-5 text-[#9055ff]" />
-              </button>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors cursor-default">
                 <TrendingUp className="w-5 h-5 text-emerald-400 mb-3" />
                 <p className="text-2xl font-bold text-white">+14%</p>
@@ -273,6 +270,13 @@ export default function AnalyticsPage() {
                 <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black">Cost Reduction</p>
               </div>
             </div>
+
+            <Link href="/dashboard/chat?prompt=Give me a personalized AI Optimization Plan to save more money next month based on my recent spending across all categories. Please analyze my data and provide 3-5 actionable steps.">
+              <button className="flex items-center gap-2 text-white font-bold group-hover:gap-4 transition-all cursor-pointer">
+                View AI Optimization Plan
+                <ArrowRight className="w-5 h-5 text-[#9055ff]" />
+              </button>
+            </Link>
           </div>
           
           {/* Decorative Background Glow */}

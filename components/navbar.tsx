@@ -19,7 +19,7 @@ export function Navbar() {
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [user, setUser] = useState<{ full_name?: string } | null>(null)
+  const [user, setUser] = useState<{ full_name?: string; avatar_url?: string } | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,24 +32,38 @@ export function Navbar() {
   useEffect(() => {
     const supabase = createClient()
 
-    async function setUserFromAuth(authUser: { id: string; email?: string; user_metadata?: { full_name?: string } } | null) {
+    async function setUserFromAuth(authUser: { id: string; email?: string; user_metadata?: { full_name?: string; avatar_url?: string } } | null) {
       if (!authUser) {
         setUser(null)
         return
       }
       let fullName = authUser.user_metadata?.full_name
-      if (!fullName) {
-        const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", authUser.id).single()
-        fullName = profile?.full_name || authUser.email?.split("@")[0] || "User"
-      }
-      setUser({ full_name: fullName })
+      let avatarUrl = authUser.user_metadata?.avatar_url
+      
+      const { data: profile } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", authUser.id).single()
+      fullName = profile?.full_name || fullName || authUser.email?.split("@")[0] || "User"
+      avatarUrl = profile?.avatar_url || avatarUrl
+      
+      setUser({ full_name: fullName, avatar_url: avatarUrl })
     }
 
     supabase.auth.getUser().then(({ data: { user } }) => setUserFromAuth(user))
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserFromAuth(session?.user ?? null)
     })
-    return () => subscription.unsubscribe()
+    
+    const handleUpdate = () => {
+      supabase.auth.getUser().then(({ data: { user } }) => setUserFromAuth(user))
+    }
+    
+    window.addEventListener("avatarUpdated", handleUpdate)
+    window.addEventListener("profileUpdated", handleUpdate)
+    
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener("avatarUpdated", handleUpdate)
+      window.removeEventListener("profileUpdated", handleUpdate)
+    }
   }, [])
 
   async function handleLogout() {
@@ -124,7 +138,7 @@ export function Navbar() {
                       <p className="text-[10px] text-white/40 uppercase tracking-wider">Pro Plan</p>
                     </div>
                     <Avatar className="h-9 w-9 border-2 border-white/10 group-hover:border-[#7b39fc] transition-all">
-                      <AvatarImage src="https://avatars.githubusercontent.com/u/124599?v=4" />
+                      <AvatarImage src={user.avatar_url || undefined} />
                       <AvatarFallback>
                         {user.full_name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
                       </AvatarFallback>
@@ -233,7 +247,7 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors">
                       <Avatar className="h-10 w-10 border-2 border-white/10">
-                        <AvatarImage src="https://avatars.githubusercontent.com/u/124599?v=4" />
+                        <AvatarImage src={user.avatar_url || undefined} />
                         <AvatarFallback>
                           {user.full_name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
                         </AvatarFallback>

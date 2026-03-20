@@ -54,11 +54,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       if (authUser) {
         let fullName = authUser.user_metadata?.full_name
         let avatarUrl = authUser.user_metadata?.avatar_url
-        if (!fullName) {
-          const { data: profile } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", authUser.id).single()
-          fullName = profile?.full_name || authUser.email?.split("@")[0] || "User"
-          avatarUrl = profile?.avatar_url || avatarUrl
-        }
+        const { data: profile } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", authUser.id).single()
+        fullName = profile?.full_name || fullName || authUser.email?.split("@")[0] || "User"
+        avatarUrl = profile?.avatar_url || avatarUrl
+        
         setUser({
           full_name: fullName,
           email: authUser.email,
@@ -67,6 +66,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       }
     }
     fetchUser()
+    window.addEventListener("avatarUpdated", fetchUser)
+    window.addEventListener("profileUpdated", fetchUser)
+    return () => {
+      window.removeEventListener("avatarUpdated", fetchUser)
+      window.removeEventListener("profileUpdated", fetchUser)
+    }
   }, [])
 
   async function handleLogout() {
