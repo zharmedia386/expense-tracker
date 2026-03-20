@@ -52,7 +52,7 @@ const statusLabel: Record<string, string> = {
   Refunded: "Refunded",
 }
 
-export default function ExpensesPage() {
+function ExpensesContent() {
   const searchParams = useSearchParams()
   const editId = searchParams.get("edit")
   const [searchInput, setSearchInput] = React.useState("")
@@ -439,5 +439,21 @@ export default function ExpensesPage() {
         expense={editExpense}
       />
     </DashboardLayout>
+  )
+}
+
+export default function ExpensesPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <DashboardLayout>
+          <div className="flex h-full items-center justify-center p-20">
+            <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+          </div>
+        </DashboardLayout>
+      }
+    >
+      <ExpensesContent />
+    </React.Suspense>
   )
 }

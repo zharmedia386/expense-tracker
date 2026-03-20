@@ -76,7 +76,7 @@ function PieChartIcon(props: any) {
   )
 }
 
-export default function ChatBotPage() {
+function ChatBotContent() {
   const supabase = createClient() // For auth check only
   const [sessions, setSessions] = React.useState<ChatSession[]>([])
   const [currentSessionId, setCurrentSessionId] = React.useState<string | null>(null)
@@ -664,5 +664,21 @@ export default function ChatBotPage() {
         </AlertDialogContent>
       </AlertDialog>
     </DashboardLayout>
+  )
+}
+
+export default function ChatBotPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <DashboardLayout>
+          <div className="flex h-[calc(100vh-12rem)] max-w-6xl mx-auto border border-white/10 rounded-[40px] bg-white/[0.02] overflow-hidden backdrop-blur-sm items-center justify-center">
+            <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+          </div>
+        </DashboardLayout>
+      }
+    >
+      <ChatBotContent />
+    </React.Suspense>
   )
 }
