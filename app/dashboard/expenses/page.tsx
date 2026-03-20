@@ -12,7 +12,6 @@ import {
   MoreHorizontal, 
   ArrowUpRight,
   Calendar,
-  Tag
 } from "lucide-react"
 import Link from "next/link"
 import { ModernButton } from "@/components/modern-button"
@@ -27,6 +26,7 @@ import { useExpenses } from "@/hooks/use-expenses"
 import { AddExpenseDialog } from "@/components/add-expense-dialog"
 import { formatIDR } from "@/lib/currency"
 import { exportExpensesToCSV } from "@/lib/export-expenses"
+import { getCategoryStyle } from "@/lib/expense-category-styles"
 import { toast } from "sonner"
 import type { Expense, ExpenseCategory } from "@/lib/expenses/types"
 
@@ -224,7 +224,7 @@ export default function ExpensesPage() {
                 <thead>
                   <tr className="text-white/30 text-xs uppercase tracking-wider border-b border-white/5">
                     <th className="px-8 py-5 font-semibold">Transaction</th>
-                    <th className="px-6 py-5 font-semibold text-center">Category</th>
+                    <th className="px-6 py-5 font-semibold">Category</th>
                     <th className="px-6 py-5 font-semibold text-center">Date</th>
                     <th className="px-6 py-5 font-semibold text-center">Status</th>
                     <th className="px-6 py-5 font-semibold text-right">Amount</th>
@@ -242,21 +242,31 @@ export default function ExpensesPage() {
                       return (
                         <tr key={expense.id} className="group hover:bg-white/[0.02] transition-colors">
                           <td className="px-8 py-5 whitespace-nowrap">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-white/5 to-white/[0.08] border border-white/10 flex items-center justify-center font-bold text-xs text-white/80 shrink-0">
-                                {expense.merchant[0]}
-                              </div>
-                              <div>
-                                <p className="text-white font-medium group-hover:text-[#9055ff] transition-colors">{expense.merchant}</p>
-                                <p className="text-xs text-white/30">{expense.description}</p>
-                              </div>
-                            </div>
+                            {(() => {
+                              const { icon: CategoryIcon, colorClass } = getCategoryStyle(expense.category)
+                              return (
+                                <div className="flex items-center gap-4">
+                                  <div className={`w-10 h-10 rounded-lg ${colorClass} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                                    <CategoryIcon className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <p className="text-white font-medium group-hover:text-[#9055ff] transition-colors">{expense.merchant}</p>
+                                    <p className="text-xs text-white/40">{expense.description}</p>
+                                  </div>
+                                </div>
+                              )
+                            })()}
                           </td>
-                          <td className="px-6 py-5 whitespace-nowrap text-center">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-white/60">
-                              <Tag className="w-3 h-3" />
-                              {expense.category}
-                            </span>
+                          <td className="px-6 py-5 whitespace-nowrap">
+                            {(() => {
+                              const { icon: CategoryIcon, colorClass } = getCategoryStyle(expense.category)
+                              return (
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+                                  <CategoryIcon className="w-3.5 h-3.5" />
+                                  {expense.category}
+                                </span>
+                              )
+                            })()}
                           </td>
                           <td className="px-6 py-5 whitespace-nowrap text-center text-white/40 text-sm">
                             {dateStr}

@@ -21,6 +21,7 @@ import { useAnalytics } from "@/hooks/use-analytics"
 import { AddExpenseDialog } from "@/components/add-expense-dialog"
 import { formatIDR } from "@/lib/currency"
 import { exportExpensesToCSV } from "@/lib/export-expenses"
+import { getCategoryStyle } from "@/lib/expense-category-styles"
 import { toast } from "sonner"
 
 export default function DashboardPage() {
@@ -186,14 +187,32 @@ export default function DashboardPage() {
                   return (
                     <tr key={row.id} className="group border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
                       <td className="py-5 pr-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-xs">
-                            {row.merchant[0]}
-                          </div>
-                          <span className="text-white font-medium group-hover:text-[#9055ff] transition-colors">{row.merchant}</span>
-                        </div>
+                        {(() => {
+                          const { icon: CategoryIcon, colorClass } = getCategoryStyle(row.category)
+                          return (
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg ${colorClass} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                                <CategoryIcon className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="text-white font-medium group-hover:text-[#9055ff] transition-colors">{row.merchant}</p>
+                                <p className="text-xs text-white/40">{row.description}</p>
+                              </div>
+                            </div>
+                          )
+                        })()}
                       </td>
-                      <td className="py-5 pr-4 text-white/50">{row.category}</td>
+                      <td className="py-5 pr-4">
+                        {(() => {
+                          const { icon: CategoryIcon, colorClass } = getCategoryStyle(row.category)
+                          return (
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+                              <CategoryIcon className="w-3.5 h-3.5" />
+                              {row.category}
+                            </span>
+                          )
+                        })()}
+                      </td>
                       <td className="py-5 pr-4 text-white/50">{dateStr}</td>
                       <td className="py-5 pr-4 text-right font-bold text-white">
                         {formatIDR(-amt)}
