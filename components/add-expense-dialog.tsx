@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ModernButton } from "@/components/modern-button"
+import { ModernSelect } from "@/components/modern-select"
+import { ModernDatepicker } from "@/components/modern-datepicker"
 import type { Expense, ExpenseInsert, ExpenseCategory, ExpenseStatus } from "@/lib/expenses/types"
 
 const CATEGORIES: ExpenseCategory[] = [
@@ -25,7 +27,12 @@ const CATEGORIES: ExpenseCategory[] = [
   "Utilities",
 ]
 
-const STATUSES: ExpenseStatus[] = ["Completed", "Pending", "Refunded"]
+const CATEGORY_OPTIONS = CATEGORIES.map(c => ({ label: c, value: c }))
+const STATUS_OPTIONS = [
+  { label: "Verified", value: "Completed" },
+  { label: "Pending", value: "Pending" },
+  { label: "Refunded", value: "Refunded" },
+]
 
 interface AddExpenseDialogProps {
   open: boolean
@@ -45,9 +52,7 @@ export function AddExpenseDialog({
   const [description, setDescription] = React.useState("")
   const [category, setCategory] = React.useState<ExpenseCategory>("Food & Dining")
   const [amount, setAmount] = React.useState("")
-  const [expenseDate, setExpenseDate] = React.useState(
-    new Date().toISOString().slice(0, 10)
-  )
+  const [expenseDate, setExpenseDate] = React.useState<Date | undefined>(new Date())
   const [merchant, setMerchant] = React.useState("")
   const [status, setStatus] = React.useState<ExpenseStatus>("Completed")
   const [paymentMethod, setPaymentMethod] = React.useState("Personal Card")
@@ -59,7 +64,7 @@ export function AddExpenseDialog({
       setDescription(expense.description)
       setCategory(expense.category)
       setAmount(String(expense.amount))
-      setExpenseDate(expense.expense_date)
+      setExpenseDate(new Date(expense.expense_date))
       setMerchant(expense.merchant)
       setStatus(expense.status)
       setPaymentMethod(expense.payment_method ?? "Personal Card")
@@ -67,7 +72,7 @@ export function AddExpenseDialog({
       setDescription("")
       setCategory("Food & Dining")
       setAmount("")
-      setExpenseDate(new Date().toISOString().slice(0, 10))
+      setExpenseDate(new Date())
       setMerchant("")
       setStatus("Completed")
       setPaymentMethod("Personal Card")
@@ -77,7 +82,7 @@ export function AddExpenseDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const amt = parseFloat(amount)
-    if (!description.trim() || isNaN(amt) || amt <= 0 || !merchant.trim()) {
+    if (!description.trim() || isNaN(amt) || amt <= 0 || !merchant.trim() || !expenseDate) {
       return
     }
     setSaving(true)
@@ -85,7 +90,7 @@ export function AddExpenseDialog({
       description: description.trim(),
       category,
       amount: amt,
-      expense_date: expenseDate,
+      expense_date: expenseDate.toISOString().split('T')[0],
       merchant: merchant.trim(),
       status,
       payment_method: paymentMethod,
@@ -106,105 +111,94 @@ export function AddExpenseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#0c0a14] border-white/10 text-white sm:max-w-md">
+      <DialogContent className="bg-[#0c0a14] border-white/10 text-white sm:max-w-md rounded-[32px] shadow-2xl backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle className="text-white">{isEdit ? "Edit Expense" : "Add Expense"}</DialogTitle>
+          <DialogTitle className="text-xl font-bold tracking-tight text-white">{isEdit ? "Edit Transaction" : "New Transaction"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label className="text-white/60 text-sm">Merchant</Label>
+        <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+          <div className="space-y-1.5">
+            <Label className="text-white/40 text-[10px] uppercase tracking-widest font-bold ml-1">Merchant</Label>
             <Input
               value={merchant}
               onChange={(e) => setMerchant(e.target.value)}
               placeholder="e.g. Starbucks"
-              className="bg-white/5 border-white/10 mt-1 text-white"
+              className="bg-white/5 border-white/10 text-sm h-11 rounded-xl focus-visible:ring-[#7b39fc]"
               required
             />
           </div>
-          <div>
-            <Label className="text-white/60 text-sm">Description</Label>
+          <div className="space-y-1.5">
+            <Label className="text-white/40 text-[10px] uppercase tracking-widest font-bold ml-1">Description</Label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Coffee"
-              className="bg-white/5 border-white/10 mt-1 text-white"
+              placeholder="e.g. Morning Coffee"
+              className="bg-white/5 border-white/10 text-sm h-11 rounded-xl focus-visible:ring-[#7b39fc]"
               required
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-white/60 text-sm">Amount (IDR)</Label>
+            <div className="space-y-1.5">
+              <Label className="text-white/40 text-[10px] uppercase tracking-widest font-bold ml-1">Amount (IDR)</Label>
               <Input
                 type="number"
                 step="0.01"
                 min="0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="e.g. 50000"
-                className="bg-white/5 border-white/10 mt-1 text-white"
+                placeholder="0"
+                className="bg-white/5 border-white/10 text-sm h-11 rounded-xl focus-visible:ring-[#7b39fc] tabular-nums"
                 required
               />
             </div>
-            <div>
-              <Label className="text-white/60 text-sm">Date</Label>
-              <Input
-                type="date"
-                value={expenseDate}
-                onChange={(e) => setExpenseDate(e.target.value)}
-                className="bg-white/5 border-white/10 mt-1 text-white"
-                required
+            <div className="space-y-1.5">
+              <Label className="text-white/40 text-[10px] uppercase tracking-widest font-bold ml-1 text-white">Date</Label>
+              <ModernDatepicker
+                date={expenseDate}
+                onDateChange={(d) => setExpenseDate(d)}
+                className="h-11"
               />
             </div>
           </div>
-          <div>
-            <Label className="text-white/60 text-sm">Category</Label>
-            <select
+          <div className="space-y-1.5">
+            <Label className="text-white/40 text-[10px] uppercase tracking-widest font-bold ml-1 text-white">Category</Label>
+            <ModernSelect
               value={category}
-              onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-              className="w-full mt-1 h-10 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-sm"
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              onValueChange={(v) => setCategory(v as ExpenseCategory)}
+              options={CATEGORY_OPTIONS}
+              placeholder="Select category"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-white/60 text-sm">Status</Label>
-              <select
+            <div className="space-y-1.5">
+              <Label className="text-white/40 text-[10px] uppercase tracking-widest font-bold ml-1 text-white">Status</Label>
+              <ModernSelect
                 value={status}
-                onChange={(e) => setStatus(e.target.value as ExpenseStatus)}
-                className="w-full mt-1 h-10 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-sm"
-              >
-                {STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+                onValueChange={(v) => setStatus(v as ExpenseStatus)}
+                options={STATUS_OPTIONS}
+                placeholder="Select status"
+              />
             </div>
-            <div>
-              <Label className="text-white/60 text-sm">Payment</Label>
+            <div className="space-y-1.5">
+              <Label className="text-white/40 text-[10px] uppercase tracking-widest font-bold ml-1 text-white">Payment</Label>
               <Input
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 placeholder="Personal Card"
-                className="bg-white/5 border-white/10 mt-1 text-white"
+                className="bg-white/5 border-white/10 text-sm h-11 rounded-xl focus-visible:ring-[#7b39fc]"
               />
             </div>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="pt-6 gap-3 sm:gap-2">
             <ModernButton
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
+              className="px-8 cursor-pointer"
             >
               Cancel
             </ModernButton>
-            <ModernButton type="submit" variant="primary" disabled={saving}>
-              {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Expense"}
+            <ModernButton type="submit" variant="primary" disabled={saving} className="px-8 min-w-[140px] cursor-pointer">
+              {saving ? "Processing..." : isEdit ? "Update" : "Create"}
             </ModernButton>
           </DialogFooter>
         </form>

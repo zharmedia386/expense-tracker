@@ -13,7 +13,7 @@ const ModernButton = forwardRef<HTMLButtonElement, ModernButtonProps>(
       rounded-xl transition-all duration-200 ease-out
       focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
       disabled:opacity-50 disabled:cursor-not-allowed
-      active:scale-[0.98]
+      active:scale-[0.98] cursor-pointer
     `
 
     const variants = {

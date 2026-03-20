@@ -28,6 +28,7 @@ import {
   ChevronRight
 } from "lucide-react"
 import { ModernButton } from "./modern-button"
+import { ModernSelect } from "./modern-select"
 import { formatIDR } from "@/lib/currency"
 import { motion } from "framer-motion"
 import { useScrollReveal } from "../hooks/use-scroll-reveal"
@@ -142,6 +143,9 @@ export function ExpenseTable() {
   ]
 
   const statuses: (ExpenseStatus | "All")[] = ["All", "Completed", "Pending", "Refunded"]
+
+  const categoryOptions = categories.map(cat => ({ label: cat, value: cat }))
+  const statusOptions = statuses.map(s => ({ label: s, value: s }))
 
   const filteredAndSortedExpenses = useMemo(() => {
     let result = [...sampleExpenses]
@@ -389,30 +393,24 @@ export function ExpenseTable() {
               <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/5 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 {/* Category Filter */}
                 <div className="flex-1">
-                  <label className="block text-white/40 text-xs font-[family-name:var(--font-cabin)] mb-2">Category</label>
-                  <select
+                  <label className="block text-white/40 text-[10px] uppercase tracking-widest font-bold mb-2 ml-1">Category</label>
+                  <ModernSelect
                     value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value as ExpenseCategory | "All")}
-                    className="w-full h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-white font-[family-name:var(--font-inter)] text-sm focus:outline-none focus:border-[#7b39fc]/50 appearance-none cursor-pointer"
-                  >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat} className="bg-[#1a1625]">{cat}</option>
-                    ))}
-                  </select>
+                    onValueChange={(v) => setSelectedCategory(v as ExpenseCategory | "All")}
+                    options={categoryOptions}
+                    placeholder="Select category"
+                  />
                 </div>
 
                 {/* Status Filter */}
                 <div className="flex-1">
-                  <label className="block text-white/40 text-xs font-[family-name:var(--font-cabin)] mb-2">Status</label>
-                  <select
+                  <label className="block text-white/40 text-[10px] uppercase tracking-widest font-bold mb-2 ml-1">Status</label>
+                  <ModernSelect
                     value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value as ExpenseStatus | "All")}
-                    className="w-full h-10 px-3 bg-white/5 border border-white/10 rounded-lg text-white font-[family-name:var(--font-inter)] text-sm focus:outline-none focus:border-[#7b39fc]/50 appearance-none cursor-pointer"
-                  >
-                    {statuses.map(status => (
-                      <option key={status} value={status} className="bg-[#1a1625]">{status}</option>
-                    ))}
-                  </select>
+                    onValueChange={(v) => setSelectedStatus(v as ExpenseStatus | "All")}
+                    options={statusOptions}
+                    placeholder="Select status"
+                  />
                 </div>
 
                 {/* Clear Filters */}
