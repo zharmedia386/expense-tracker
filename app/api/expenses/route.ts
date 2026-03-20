@@ -18,12 +18,14 @@ export async function GET(request: Request) {
   const search = searchParams.get("search")?.trim()
   const limit = parseInt(searchParams.get("limit") ?? "100", 10)
   const offset = parseInt(searchParams.get("offset") ?? "0", 10)
+  const sortBy = searchParams.get("sortBy") ?? "expense_date"
+  const sortOrder = searchParams.get("sortOrder") ?? "desc"
 
   let query = supabase
     .from("expenses")
     .select("*", { count: "exact" })
     .eq("user_id", user.id)
-    .order("expense_date", { ascending: false })
+    .order(sortBy, { ascending: sortOrder === "asc" })
     .range(offset, offset + limit - 1)
 
   if (category) query = query.eq("category", category)

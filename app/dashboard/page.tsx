@@ -13,7 +13,10 @@ import {
   TrendingUp, 
   Calendar,
   ArrowUpRight,
-  Plus
+  Plus,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react"
 import { ModernButton } from "@/components/modern-button"
 import { useExpenses } from "@/hooks/use-expenses"
@@ -27,7 +30,14 @@ import { toast } from "sonner"
 export default function DashboardPage() {
   const [addOpen, setAddOpen] = React.useState(false)
   const [reportLoading, setReportLoading] = React.useState(false)
-  const { expenses, count: totalExpenses, loading: expensesLoading, createExpense, refetch, exportAll } = useExpenses({ pageSize: 10 })
+  const [sortBy, setSortBy] = React.useState<string>("expense_date")
+  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("desc")
+  
+  const { expenses, count: totalExpenses, loading: expensesLoading, createExpense, refetch, exportAll } = useExpenses({ 
+    pageSize: 10,
+    sortBy,
+    sortOrder
+  })
   const { data: analytics } = useAnalytics(6)
 
   const recentExpenses = expenses.slice(0, 5)
@@ -67,6 +77,22 @@ export default function DashboardPage() {
       icon: Calendar,
     },
   ]
+
+  const toggleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(field)
+      setSortOrder("desc")
+    }
+  }
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortBy !== field) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-20" />
+    return sortOrder === "asc" 
+      ? <ChevronUp className="w-3 h-3 ml-1 text-[#9055ff]" /> 
+      : <ChevronDown className="w-3 h-3 ml-1 text-[#9055ff]" />
+  }
 
   return (
     <DashboardLayout>
@@ -155,11 +181,19 @@ export default function DashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="text-white/30 text-xs uppercase tracking-wider border-b border-white/5">
-                <th className="pb-4 font-semibold">Transaction</th>
-                <th className="pb-4 font-semibold">Category</th>
-                <th className="pb-4 font-semibold">Date</th>
-                <th className="pb-4 font-semibold text-right">Amount</th>
+              <tr className="text-white/30 text-[10px] uppercase tracking-wider border-b border-white/5">
+                <th className="pb-4 font-semibold cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("merchant")}>
+                  <div className="flex items-center">Transaction <SortIcon field="merchant" /></div>
+                </th>
+                <th className="pb-4 font-semibold cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("category")}>
+                  <div className="flex items-center">Category <SortIcon field="category" /></div>
+                </th>
+                <th className="pb-4 font-semibold cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("expense_date")}>
+                  <div className="flex items-center">Date <SortIcon field="expense_date" /></div>
+                </th>
+                <th className="pb-4 font-semibold text-right cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("amount")}>
+                  <div className="flex items-center justify-end">Amount <SortIcon field="amount" /></div>
+                </th>
                 <th className="pb-4 font-semibold text-right">Action</th>
               </tr>
             </thead>

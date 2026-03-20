@@ -61,7 +61,7 @@ const placeholderWeekly = [
 
 export default function AnalyticsPage() {
   const [timeframe, setTimeframe] = React.useState("180")
-  const { data, loading, error } = useAnalytics(6) // Fixed for now, but timeframe could be used
+  const { data, loading, error } = useAnalytics(Number(timeframe))
 
   const monthlyData = data?.monthlyData?.length ? data.monthlyData : placeholderMonthly
   const categoryData = data?.categoryData?.length ? data.categoryData : placeholderCategory

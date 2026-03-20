@@ -6,14 +6,16 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { motion } from "framer-motion"
 import { 
   Search, 
-  Filter, 
-  Download, 
   Plus, 
+  Download, 
+  Filter, 
+  Trash2, 
   Pencil,
-  Trash2,
+  ChevronLeft,
   ChevronRight,
-  ArrowUpRight,
-  Calendar,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react"
 import Link from "next/link"
 import { ModernButton } from "@/components/modern-button"
@@ -63,6 +65,8 @@ export default function ExpensesPage() {
   const [exportLoading, setExportLoading] = React.useState(false)
   const [editOpen, setEditOpen] = React.useState(false)
   const [fetchedEditExpense, setFetchedEditExpense] = React.useState<Expense | null>(null)
+  const [sortBy, setSortBy] = React.useState<string>("expense_date")
+  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("desc")
 
   React.useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchInput), 300)
@@ -92,6 +96,8 @@ export default function ExpensesPage() {
     category: (categoryFilter === "all" || !categoryFilter) ? undefined : (categoryFilter as ExpenseCategory),
     from: dateFrom?.toISOString().split('T')[0],
     to: dateTo?.toISOString().split('T')[0],
+    sortBy,
+    sortOrder,
   })
 
   const editExpense = expenses.find((e) => e.id === editId) ?? fetchedEditExpense
@@ -113,7 +119,23 @@ export default function ExpensesPage() {
         if (!cancelled && data) setFetchedEditExpense(data)
       })
     return () => { cancelled = true }
-  }, [editId, expenses])
+  }, [editId])
+
+  const toggleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(field)
+      setSortOrder("desc")
+    }
+  }
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortBy !== field) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-20" />
+    return sortOrder === "asc"
+      ? <ChevronUp className="w-3 h-3 ml-1 text-[#9055ff]" />
+      : <ChevronDown className="w-3 h-3 ml-1 text-[#9055ff]" />
+  }
 
   React.useEffect(() => {
     if (editId && editExpense) setEditOpen(true)
@@ -236,11 +258,21 @@ export default function ExpensesPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="text-white/30 text-[10px] uppercase tracking-[0.2em] font-bold border-b border-white/5">
-                    <th className="px-8 py-6">Transaction</th>
-                    <th className="px-6 py-6">Category</th>
-                    <th className="px-6 py-6 text-center">Date</th>
-                    <th className="px-6 py-6 text-center">Status</th>
-                    <th className="px-6 py-6 text-right">Amount</th>
+                    <th className="px-8 py-6 cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("merchant")}>
+                      <div className="flex items-center">Transaction <SortIcon field="merchant" /></div>
+                    </th>
+                    <th className="px-6 py-6 cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("category")}>
+                      <div className="flex items-center">Category <SortIcon field="category" /></div>
+                    </th>
+                    <th className="px-6 py-6 text-center cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("expense_date")}>
+                      <div className="flex items-center justify-center">Date <SortIcon field="expense_date" /></div>
+                    </th>
+                    <th className="px-6 py-6 text-center cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("status")}>
+                      <div className="flex items-center justify-center">Status <SortIcon field="status" /></div>
+                    </th>
+                    <th className="px-6 py-6 text-right cursor-pointer hover:text-white transition-colors group" onClick={() => toggleSort("amount")}>
+                      <div className="flex items-center justify-end">Amount <SortIcon field="amount" /></div>
+                    </th>
                     <th className="px-8 py-6 text-right">Action</th>
                   </tr>
                 </thead>

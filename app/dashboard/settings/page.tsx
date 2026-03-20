@@ -3,6 +3,7 @@
 import * as React from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { motion } from "framer-motion"
+import { useRouter } from "next/navigation"
 import { 
   User, 
   Lock, 
@@ -31,6 +32,7 @@ const settingsSections = [
 ]
 
 export default function SettingsPage() {
+  const router = useRouter()
   const [activeSection, setActiveSection] = React.useState("profile")
   const [profile, setProfile] = React.useState({
     full_name: "",
@@ -43,6 +45,8 @@ export default function SettingsPage() {
   const [pushNotifications, setPushNotifications] = React.useState(true)
   const [profileSaving, setProfileSaving] = React.useState(false)
   const [notifSaving, setNotifSaving] = React.useState(false)
+  const [avatarUploading, setAvatarUploading] = React.useState(false)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
     async function load() {
@@ -107,6 +111,33 @@ export default function SettingsPage() {
     }
   }
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setAvatarUploading(true)
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const res = await fetch("/api/profile/avatar", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!res.ok) throw new Error("Upload failed")
+      
+      const data = await res.json()
+      setProfile((p) => ({ ...p, avatar_url: data.avatar_url }))
+      toast.success("Avatar updated")
+      router.refresh()
+    } catch {
+      toast.error("Failed to upload avatar")
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
+
   return (
     <DashboardLayout>
       <motion.div
@@ -160,16 +191,32 @@ export default function SettingsPage() {
                 <h3 className="text-xl font-bold text-white mb-8">Personal Information</h3>
                 
                 <div className="flex flex-col md:flex-row gap-10">
-                  <div className="relative shrink-0">
+                  <div className="relative shrink-0 w-24 h-24">
                     <Avatar className="h-24 w-24 border-4 border-white/5 shadow-2xl">
                       <AvatarImage src={profile.avatar_url || undefined} />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-[#7b39fc]/20 text-[#9055ff] text-xl font-bold">
                         {profile.full_name?.slice(0, 2).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
-                    <button className="absolute bottom-0 right-0 p-2 rounded-full bg-[#7b39fc] text-white shadow-lg hover:bg-[#9055ff] transition-all border-4 border-[#0c0a14]">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleAvatarUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute bottom-0 right-0 p-2 rounded-full bg-[#7b39fc] text-white shadow-lg hover:bg-[#9055ff] transition-all border-4 border-[#0c0a14] cursor-pointer z-10"
+                      title="Update Avatar"
+                    >
                       <Camera className="w-4 h-4" />
                     </button>
+                    {avatarUploading && (
+                      <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm z-20">
+                        <div className="w-6 h-6 border-2 border-[#7b39fc] border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">

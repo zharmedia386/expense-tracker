@@ -10,10 +10,10 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url)
-  const months = parseInt(searchParams.get("months") ?? "6", 10)
+  const days = parseInt(searchParams.get("days") ?? "180", 10)
 
   const fromDate = new Date()
-  fromDate.setMonth(fromDate.getMonth() - months)
+  fromDate.setDate(fromDate.getDate() - days)
   const from = fromDate.toISOString().slice(0, 10)
 
   const { data: expenses, error } = await supabase

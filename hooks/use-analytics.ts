@@ -10,7 +10,7 @@ export interface AnalyticsData {
   totals: { spending: number; refunded: number; net: number }
 }
 
-export function useAnalytics(months = 6) {
+export function useAnalytics(days = 180) {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +19,7 @@ export function useAnalytics(months = 6) {
     let cancelled = false
     setLoading(true)
     setError(null)
-    fetch(`/api/expenses/analytics?months=${months}`)
+    fetch(`/api/expenses/analytics?days=${days}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch analytics")
         return res.json()
@@ -39,7 +39,7 @@ export function useAnalytics(months = 6) {
     return () => {
       cancelled = true
     }
-  }, [months])
+  }, [days])
 
   return { data, loading, error }
 }

@@ -12,6 +12,8 @@ export interface UseExpensesOptions {
   to?: string
   search?: string
   pageSize?: number
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
 }
 
 export function useExpenses(filters?: UseExpensesOptions) {
@@ -40,6 +42,8 @@ export function useExpenses(filters?: UseExpensesOptions) {
         if (filters?.from) params.set("from", filters.from)
         if (filters?.to) params.set("to", filters.to)
         if (filters?.search) params.set("search", filters.search)
+        if (filters?.sortBy) params.set("sortBy", filters.sortBy)
+        if (filters?.sortOrder) params.set("sortOrder", filters.sortOrder)
         params.set("offset", String(offset))
         params.set("limit", String(pageSize))
 
@@ -66,6 +70,8 @@ export function useExpenses(filters?: UseExpensesOptions) {
       filters?.from,
       filters?.to,
       filters?.search,
+      filters?.sortBy,
+      filters?.sortOrder,
       pageSize,
     ]
   )
@@ -130,6 +136,8 @@ export function useExpenses(filters?: UseExpensesOptions) {
     if (filters?.from) params.set("from", filters.from)
     if (filters?.to) params.set("to", filters.to)
     if (filters?.search) params.set("search", filters.search)
+    if (filters?.sortBy) params.set("sortBy", filters.sortBy)
+    if (filters?.sortOrder) params.set("sortOrder", filters.sortOrder)
     params.set("limit", "5000")
     params.set("offset", "0")
     const res = await fetch(`/api/expenses?${params}`)
