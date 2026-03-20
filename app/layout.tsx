@@ -27,8 +27,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Datacore - Book Your Perfect Stay',
-  description: 'Discover handpicked hotels, resorts, and stays across your favorite destinations. Enjoy exclusive deals, fast booking, and 24/7 support.',
+  title: {
+    template: '%s | ExpenseAI',
+    default: 'ExpenseAI - Intelligent Financial Tracker',
+  },
+  description: 'Master your wealth with ExpenseAI. Track expenses, analyze spending habits, and get personalized AI optimization plans to save more money.',
   generator: 'v0.app',
   icons: {
     icon: [
