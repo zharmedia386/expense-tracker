@@ -2,6 +2,8 @@
 
 AI-powered expense tracking app built with Next.js + Supabase.
 
+![Overview](public/screenshots/hero.jpeg)
+
 Live app: [https://expense-tracker.zharmedia.xyz/](https://expense-tracker.zharmedia.xyz/)
 
 ## Overview
