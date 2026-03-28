@@ -15,6 +15,16 @@ Core capabilities:
 - AI assistant with persisted chat sessions
 - Profile + settings management (including avatar upload)
 
+## Screenshots
+### Dashboard Overview
+![Dashboard Overview](public/screenshots/dashboard-overview.png)
+
+### Expenses Management
+![Expenses Management](public/screenshots/dashboard-expenses.png)
+
+### AI Assistant Chat
+![AI Assistant Chat](public/screenshots/ai-chat.png)
+
 ## Tech Stack
 - Next.js 16 (App Router)
 - React 19 + TypeScript
